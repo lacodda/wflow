@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -17,6 +17,12 @@ import (
 
 type AccessToken struct {
 	AccessToken string `json:"access_token"`
+}
+
+type Error struct {
+	StatusCode int8   `json:"statusCode"`
+	Message    string `json:"message"`
+	Error      string `json:"error"`
 }
 
 const (
@@ -73,12 +79,19 @@ var LoginCmd = &cobra.Command{
 			return
 		}
 
-		body := signIn(login, password)
+		resp := signIn(login, password)
+		body, _ := io.ReadAll(resp.Body)
+		if resp.StatusCode != http.StatusCreated {
+			errResp := getError(body)
+			red := color.New(color.FgRed)
+			red.Printf(errResp.Message)
+			return
+		}
 		saveAccessToken(body)
 	},
 }
 
-func signIn(login string, password string) []byte {
+func signIn(login string, password string) *http.Response {
 	data := url.Values{
 		"email":    {login},
 		"password": {password},
@@ -90,9 +103,7 @@ func signIn(login string, password string) []byte {
 		log.Fatal(err)
 	}
 
-	body, _ := ioutil.ReadAll(resp.Body)
-
-	return body
+	return resp
 }
 
 func saveAccessToken(body []byte) {
@@ -104,6 +115,13 @@ func saveAccessToken(body []byte) {
 
 func getAccessToken(body []byte) AccessToken {
 	result := AccessToken{}
+	json.Unmarshal([]byte(body), &result)
+
+	return result
+}
+
+func getError(body []byte) Error {
+	result := Error{}
 	json.Unmarshal([]byte(body), &result)
 
 	return result
