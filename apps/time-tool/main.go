@@ -1,12 +1,7 @@
 package main
 
-import "fmt"
-
-func Hello(name string) string {
-	result := "Hello " + name
-	return result
-}
+import "finlab/apps/time-tool/cmd"
 
 func main() {
-	fmt.Println(Hello("time-tool"))
+	cmd.Execute()
 }
