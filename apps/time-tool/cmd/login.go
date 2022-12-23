@@ -15,20 +15,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type AccessToken struct {
-	AccessToken string `json:"access_token"`
-}
-
-type Error struct {
-	StatusCode int8   `json:"statusCode"`
-	Message    string `json:"message"`
-	Error      string `json:"error"`
-}
-
-const (
-	host string = "http://localhost:3333/api/auth/login"
-)
-
 // LoginCmd provides the command for logging into the FA server using the Device Flow.
 var LoginCmd = &cobra.Command{
 	Use:   "login",
@@ -97,7 +83,7 @@ func signIn(login string, password string) *http.Response {
 		"password": {password},
 	}
 
-	resp, err := http.PostForm(host, data)
+	resp, err := http.PostForm(Host+"/api/auth/login", data)
 
 	if err != nil {
 		log.Fatal(err)
@@ -107,7 +93,7 @@ func signIn(login string, password string) *http.Response {
 }
 
 func saveAccessToken(body []byte) {
-	Save("access-token.json", getAccessToken(body))
+	Save(AccessTokenFile, getAccessToken(body))
 
 	cyan := color.New(color.FgCyan)
 	cyan.Printf("You successfully authenticated!")

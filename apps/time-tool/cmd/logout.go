@@ -10,7 +10,7 @@ var LogoutCmd = &cobra.Command{
 	Use:   "logout",
 	Short: "Logs out the user by removing the user's session from local state.",
 	Run: func(cmd *cobra.Command, args []string) {
-		Remove("access-token.json")
+		Remove(AccessTokenFile)
 
 		cyan := color.New(color.FgCyan)
 		cyan.Printf("You've been logged out!\n")
