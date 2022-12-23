@@ -33,4 +33,5 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(LoginCmd)
 	rootCmd.AddCommand(LogoutCmd)
+	rootCmd.AddCommand(TimestampCmd)
 }
