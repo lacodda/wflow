@@ -2,11 +2,18 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 )
+
+type Credentials struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
 
 type AccessToken struct {
 	AccessToken string `json:"access_token"`
@@ -31,50 +38,60 @@ type Method string
 
 const (
 	Get     Method = "GET"
-	Head           = "HEAD"
-	Post           = "POST"
-	Put            = "PUT"
-	Patch          = "PATCH" // RFC 5789
-	Delete         = "DELETE"
-	Connect        = "CONNECT"
-	Options        = "OPTIONS"
-	Trace          = "TRACE"
-)
-
-const (
-	Host            string = "http://localhost:3333"
-	AccessTokenFile string = "access-token.json"
+	Head    Method = "HEAD"
+	Post    Method = "POST"
+	Put     Method = "PUT"
+	Patch   Method = "PATCH" // RFC 5789
+	Delete  Method = "DELETE"
+	Connect Method = "CONNECT"
+	Options Method = "OPTIONS"
+	Trace   Method = "TRACE"
 )
 
 func GetReq(method Method, url string, jsonStr []byte) *http.Request {
-	req, _ := http.NewRequest(method.toString(), Host+url, bytes.NewBuffer(jsonStr))
+	host := ReadConfig().ApiHost
+	req, _ := http.NewRequest(method.toString(), host+url, bytes.NewBuffer(jsonStr))
 
 	req.Header = http.Header{}
-	req.Header.Set("Authorization", getToken())
+	req.Header.Set("Authorization", GetToken())
 	req.Header.Set("Content-Type", "application/json")
 
 	return req
 }
 
-func GetBody(req *http.Request) []byte {
-	client := http.Client{}
-	res, err := client.Do(req)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	body, _ := ioutil.ReadAll(res.Body)
+func SignIn(email string, password string) (AccessToken, error) {
+	accessToken := AccessToken{}
+	reqBody, _ := json.Marshal(&Credentials{
+		Email:    email,
+		Password: password,
+	})
 
-	return body
+	jsonStr := []byte(string(reqBody))
+	req := GetReq(Post, "/api/auth/login", jsonStr)
+
+	body, resp := GetBody(req)
+
+	if resp.StatusCode != http.StatusCreated {
+		err := Error{}
+		json.Unmarshal([]byte(body), &err)
+
+		return accessToken, errors.New(err.Message)
+	}
+
+	json.Unmarshal([]byte(body), &accessToken)
+
+	return accessToken, nil
 }
 
-func getToken() string {
-	var accessToken AccessToken = AccessToken{}
-	err := Load(AccessTokenFile, &accessToken)
+func GetBody(req *http.Request) ([]byte, *http.Response) {
+	client := http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatalln(err)
 	}
+	body, _ := ioutil.ReadAll(resp.Body)
 
-	return "Bearer " + accessToken.AccessToken
+	return body, resp
 }
 
 func (c Method) toString() string {

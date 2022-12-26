@@ -1,16 +1,9 @@
 package cmd
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
-	"net/url"
 
-	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
@@ -65,61 +58,12 @@ var LoginCmd = &cobra.Command{
 			return
 		}
 
-		resp := signIn(login, password)
-		body, _ := io.ReadAll(resp.Body)
-		if resp.StatusCode != http.StatusCreated {
-			errResp := getError(body)
-			red := color.New(color.FgRed)
-			red.Printf(errResp.Message)
+		token, err := SignIn(login, password)
+		if err != nil {
+			Danger.Printf(err.Error())
 			return
 		}
-		saveAccessToken(body)
+		SaveToken(token)
+		Success.Printf("You successfully authenticated!")
 	},
-}
-
-func signIn(login string, password string) *http.Response {
-	data := url.Values{
-		"email":    {login},
-		"password": {password},
-	}
-
-	resp, err := http.PostForm(Host+"/api/auth/login", data)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return resp
-}
-
-func saveAccessToken(body []byte) {
-	Save(AccessTokenFile, getAccessToken(body))
-
-	cyan := color.New(color.FgCyan)
-	cyan.Printf("You successfully authenticated!")
-}
-
-func getAccessToken(body []byte) AccessToken {
-	result := AccessToken{}
-	json.Unmarshal([]byte(body), &result)
-
-	return result
-}
-
-func getError(body []byte) Error {
-	result := Error{}
-	json.Unmarshal([]byte(body), &result)
-
-	return result
-}
-
-func PrettyPrint(b []byte) []byte {
-	var out bytes.Buffer
-	err := json.Indent(&out, b, "", "  ")
-
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	return out.Bytes()
 }
