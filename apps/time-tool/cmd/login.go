@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"errors"
+	"finlab/apps/time-tool/api"
+	"finlab/apps/time-tool/config"
+	"finlab/apps/time-tool/core"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -25,20 +28,20 @@ var LoginCmd = &cobra.Command{
 
 		login, errL := loginPrompt.Run()
 		password, errP := passwordPrompt.Run()
-		promptErr := NotNil(errL, errP)
+		promptErr := core.NotNil(errL, errP)
 
 		if promptErr != nil {
-			Danger("Prompt failed: %v\n", promptErr)
+			core.Danger("Prompt failed: %v\n", promptErr)
 			return
 		}
 
-		token, err := SignIn(login, password)
+		token, err := api.SignIn(login, password)
 		if err != nil {
-			Danger("Error: %v\n", err.Error())
+			core.Danger("Error: %v\n", err.Error())
 			return
 		}
-		SaveToken(token)
-		Success("You successfully authenticated!\n")
+		config.SaveToken(token)
+		core.Success("You successfully authenticated!\n")
 	},
 }
 

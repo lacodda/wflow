@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"finlab/apps/time-tool/config"
+	"finlab/apps/time-tool/core"
+
 	"github.com/spf13/cobra"
 )
 
@@ -9,8 +12,8 @@ var LogoutCmd = &cobra.Command{
 	Use:   "logout",
 	Short: "Logs out the user by removing the user's session from local state.",
 	Run: func(cmd *cobra.Command, args []string) {
-		RemoveToken()
+		config.RemoveToken()
 
-		Success("You've been logged out!\n")
+		core.Success("You've been logged out!\n")
 	},
 }
