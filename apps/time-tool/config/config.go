@@ -1,7 +1,8 @@
-package cmd
+package config
 
 import (
 	"encoding/json"
+	"finlab/apps/time-tool/core"
 	"path/filepath"
 
 	"github.com/shibukawa/configdir"
@@ -20,6 +21,7 @@ var DefaultConfig = Config{
 const (
 	ConfigFile      string = "config.json"
 	AccessTokenFile string = "access-token.json"
+	DbFile          string = "data.db"
 )
 
 var configDirs = configdir.New("lacodda", "time-tool")
@@ -48,21 +50,21 @@ func InitConfig() {
 	WriteConfig(DefaultConfig)
 }
 
-func SaveToken(token AccessToken) {
+func SaveToken(token core.AccessToken) {
 	data, _ := json.Marshal(&token)
 	folders := configDirs.QueryFolders(configdir.Global)
 	folders[0].WriteFile(AccessTokenFile, data)
 }
 
 func GetToken() string {
-	var accessToken AccessToken
+	var accessToken core.AccessToken
 
 	folder := configDirs.QueryFolderContainsFile(AccessTokenFile)
 	if folder != nil {
 		data, _ := folder.ReadFile(AccessTokenFile)
 		json.Unmarshal(data, &accessToken)
 	} else {
-		accessToken = AccessToken{AccessToken: ""}
+		accessToken = core.AccessToken{AccessToken: ""}
 	}
 
 	return "Bearer " + accessToken.AccessToken
@@ -71,6 +73,15 @@ func GetToken() string {
 func RemoveToken() {
 	folder := configDirs.QueryFolderContainsFile(AccessTokenFile)
 	if folder != nil {
-		Remove(filepath.Join(folder.Path, AccessTokenFile))
+		core.Remove(filepath.Join(folder.Path, AccessTokenFile))
 	}
+}
+
+func DbPath() string {
+	folders := configDirs.QueryFolders(configdir.Global)
+	if !folders[0].Exists(DbFile) {
+		folders[0].MkdirAll()
+	}
+
+	return filepath.Join(folders[0].Path, DbFile)
 }

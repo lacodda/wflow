@@ -1,4 +1,4 @@
-package cmd
+package core
 
 func If[T any](cond bool, vtrue, vfalse T) T {
 	if cond {
