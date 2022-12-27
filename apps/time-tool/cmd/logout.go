@@ -11,6 +11,6 @@ var LogoutCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		RemoveToken()
 
-		Success.Printf("You've been logged out!\n")
+		Success("You've been logged out!\n")
 	},
 }

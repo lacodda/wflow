@@ -21,6 +21,6 @@ var TimestampCmd = &cobra.Command{
 		body, _ := GetBody(req)
 		result := TimestampRes{}
 		json.Unmarshal([]byte(body), &result)
-		Info.Printf("Timestamp: %s\n", result.Data.Timestamp)
+		Info("Timestamp: %s\n", result.Data.Timestamp)
 	},
 }

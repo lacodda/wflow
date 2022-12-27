@@ -10,6 +10,6 @@ var InitCmd = &cobra.Command{
 	Short: "Configuration initialization",
 	Run: func(cmd *cobra.Command, args []string) {
 		InitConfig()
-		Success.Printf("Your configuration is initialized\n")
+		Success("Your configuration is initialized\n")
 	},
 }
