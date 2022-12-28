@@ -11,6 +11,13 @@
         "main": "apps/time-tool/main.go"
       }
     },
+    "build-hide": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "go build -ldflags -H=windowsgui -o=../../dist/apps/time-tool ./main.go",
+        "cwd": "apps/time-tool"
+      }
+    },
     "serve": {
       "executor": "@nx-go/nx-go:serve",
       "options": {
