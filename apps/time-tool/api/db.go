@@ -17,18 +17,26 @@ func db() *gorm.DB {
 	return db
 }
 
-func SetTimestamp(timestamp core.Timestamp) {
+func SetTimestamp(timestamp core.Timestamp) error {
 	err := db().AutoMigrate(&core.Timestamp{})
 	if err != nil {
-		core.Danger("Migration failure!")
-		return
+		return err
 	}
 	db().Create(&timestamp)
+	return nil
 }
 
-func GetTimestamps() []core.Timestamp {
+func GetTimestamps() ([]core.Timestamp, error) {
 	var timestamps []core.Timestamp
+	err := db().AutoMigrate(&core.Timestamp{})
+	if err != nil {
+		return timestamps, err
+	}
 	db().Find(&timestamps)
 
-	return timestamps
+	return timestamps, nil
+}
+
+func DeleteTimestamps() {
+	db().Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&core.Timestamp{})
 }
