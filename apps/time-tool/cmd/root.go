@@ -35,4 +35,6 @@ func init() {
 	rootCmd.AddCommand(LoginCmd)
 	rootCmd.AddCommand(LogoutCmd)
 	rootCmd.AddCommand(TimestampCmd)
+
+	TimestampCmd.Flags().Var(&FlagTimestampType, "type", `Type of timestamp. Allowed: "Start", "End", "StartBreak", "EndBreak"`)
 }
