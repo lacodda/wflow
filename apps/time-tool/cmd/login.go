@@ -10,10 +10,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// LoginCmd provides the command for logging into the FA server using the Device Flow.
+// LoginCmd provides the command for logging into the finlab server.
 var LoginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "Authenticate to the FA server using the OAuth Device Flow.",
+	Short: "Authenticate to the finlab server.",
 	Run: func(cmd *cobra.Command, args []string) {
 		loginPrompt := promptui.Prompt{
 			Label:    "Login",
