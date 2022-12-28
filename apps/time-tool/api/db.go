@@ -18,7 +18,11 @@ func db() *gorm.DB {
 }
 
 func SetTimestamp(timestamp core.Timestamp) {
-	db().AutoMigrate(&core.Timestamp{})
+	err := db().AutoMigrate(&core.Timestamp{})
+	if err != nil {
+		core.Danger("Migration failure!")
+		return
+	}
 	db().Create(&timestamp)
 }
 
