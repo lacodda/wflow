@@ -59,6 +59,8 @@ var TimestampCmd = &cobra.Command{
 		if err != nil {
 			core.Danger("Error: %v\n", err.Error())
 			api.SetTimestamp(timestamp)
+			core.Success("Timestamp saved in local database\n")
+			core.Info("Timestamp (%s): %s\n", timestamp.Type, timestamp.Timestamp.Format("2006-01-02T15:04:05Z"))
 			return
 		}
 

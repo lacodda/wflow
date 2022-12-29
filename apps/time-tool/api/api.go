@@ -7,7 +7,6 @@ import (
 	"finlab/apps/time-tool/config"
 	"finlab/apps/time-tool/core"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -22,15 +21,15 @@ func GetReq(method core.Method, url string, jsonStr []byte) *http.Request {
 	return req
 }
 
-func GetBody(req *http.Request) ([]byte, *http.Response) {
+func GetBody(req *http.Request) ([]byte, *http.Response, error) {
 	client := http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, nil, errors.New("Failed to connect to finlab server")
 	}
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	return body, resp
+	return body, resp, nil
 }
 
 func SignIn(email string, password string) (core.AccessToken, error) {
@@ -43,7 +42,11 @@ func SignIn(email string, password string) (core.AccessToken, error) {
 	jsonStr := []byte(string(reqBody))
 	req := GetReq(core.Post, "/api/auth/login", jsonStr)
 
-	body, resp := GetBody(req)
+	body, resp, err := GetBody(req)
+
+	if err != nil {
+		return accessToken, err
+	}
 
 	if resp.StatusCode != http.StatusCreated {
 		err := core.Error{}
@@ -66,7 +69,11 @@ func PushTimestamp(timestamp core.Timestamp) (core.TimestampRes, error) {
 
 	jsonStr := []byte(string(reqBody))
 	req := GetReq(core.Post, "/api/work-time/timestamp", jsonStr)
-	body, resp := GetBody(req)
+	body, resp, err := GetBody(req)
+
+	if err != nil {
+		return timestampRes, err
+	}
 
 	if resp.StatusCode != http.StatusCreated {
 		err := core.Error{}
