@@ -40,3 +40,10 @@ func GetTimestamps() ([]core.Timestamp, error) {
 func DeleteTimestamps() {
 	db().Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&core.Timestamp{})
 }
+
+func DeleteTimestampsByIds(ids []int) []core.Timestamp {
+	var timestamps []core.Timestamp
+	db().Where(ids).Find(&timestamps)
+	db().Delete(&core.Timestamp{}, ids)
+	return timestamps
+}

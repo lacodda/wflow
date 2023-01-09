@@ -39,4 +39,5 @@ func init() {
 
 	TimestampCmd.Flags().VarP(&FlagTimestampType, "type", "t", `Type of timestamp. Allowed: "Start", "End", "StartBreak", "EndBreak"`)
 	SyncCmd.Flags().BoolVarP(&FlagSyncShow, "show", "s", false, "Show records for synchronizing with the server")
+	SyncCmd.Flags().IntSliceVarP(&FlagSyncDelete, "delete", "d", []int{}, "ID records for deleting")
 }
