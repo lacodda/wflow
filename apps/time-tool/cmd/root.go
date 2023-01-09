@@ -37,5 +37,6 @@ func init() {
 	rootCmd.AddCommand(TimestampCmd)
 	rootCmd.AddCommand(SyncCmd)
 
-	TimestampCmd.Flags().Var(&FlagTimestampType, "type", `Type of timestamp. Allowed: "Start", "End", "StartBreak", "EndBreak"`)
+	TimestampCmd.Flags().VarP(&FlagTimestampType, "type", "t", `Type of timestamp. Allowed: "Start", "End", "StartBreak", "EndBreak"`)
+	SyncCmd.Flags().BoolVarP(&FlagSyncShow, "show", "s", false, "Show records for synchronizing with the server")
 }
