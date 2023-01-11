@@ -14,7 +14,7 @@
     "build-hide": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "go build -ldflags -H=windowsgui -o=../../dist/apps/time-tool ./main.go",
+        "command": "go build -ldflags -H=windowsgui -o=../../dist/apps/time-tool-hide ./main.go",
         "cwd": "apps/time-tool"
       }
     },
