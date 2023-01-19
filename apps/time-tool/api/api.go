@@ -86,3 +86,26 @@ func PushTimestamp(timestamp core.Timestamp) (core.TimestampRes, error) {
 
 	return timestampRes, nil
 }
+
+func PullTimestamps() (core.TimestampsRes, error) {
+	timestampsRes := core.TimestampsRes{}
+
+	jsonStr := []byte("")
+	req := GetReq(core.Get, "/api/work-time/timestamp", jsonStr)
+	body, resp, err := GetBody(req)
+
+	if err != nil {
+		return timestampsRes, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err := core.Error{}
+		json.Unmarshal([]byte(body), &err)
+
+		return timestampsRes, errors.New(err.Message)
+	}
+
+	json.Unmarshal([]byte(body), &timestampsRes)
+
+	return timestampsRes, nil
+}

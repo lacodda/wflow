@@ -35,6 +35,11 @@ type TimestampRes struct {
 	Data TimestampReq `json:"data"`
 }
 
+type TimestampsRes struct {
+	Data      []TimestampReq `json:"data"`
+	TotalTime int            `json:"totalTime"`
+}
+
 type Method string
 
 const (

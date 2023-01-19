@@ -38,6 +38,8 @@ func init() {
 	rootCmd.AddCommand(SyncCmd)
 
 	TimestampCmd.Flags().VarP(&FlagTimestampType, "type", "t", `Type of timestamp. Allowed: "Start", "End", "StartBreak", "EndBreak"`)
+	TimestampCmd.Flags().BoolVarP(&FlagTimestampShow, "show", "s", false, "Show a list of timestamps for the selected day")
+	TimestampCmd.Flags().StringVarP(&FlagTimestampDate, "date", "d", "", `Select a date to display: e.g. "2023-01-19"`)
 	SyncCmd.Flags().BoolVarP(&FlagSyncShow, "show", "s", false, "Show records for synchronizing with the server")
-	SyncCmd.Flags().IntSliceVarP(&FlagSyncDelete, "delete", "d", []int{}, "ID records for deleting")
+	SyncCmd.Flags().IntSliceVarP(&FlagSyncDelete, "delete", "D", []int{}, "ID records for deleting")
 }
