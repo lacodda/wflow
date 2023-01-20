@@ -60,11 +60,21 @@ var TimestampCmd = &cobra.Command{
 	Short: "Write timestamp and event type to database",
 	Run: func(cmd *cobra.Command, args []string) {
 		if FlagTimestampShow {
-			timestampsRes, err := api.PullTimestamps()
+			var date = time.Now()
+			if len(FlagTimestampDate) > 0 {
+				var err error
+				date, err = time.Parse(dateTpl, FlagTimestampDate)
+				if err != nil {
+					core.Danger("Error: %v\n", err.Error())
+					return
+				}
+			}
+			timestampsRes, err := api.PullTimestamps(date)
 			if err != nil {
 				core.Danger("Error: %v\n", err.Error())
 				return
 			}
+			core.Info("Date: %s\n", date.Format(dateTpl))
 			printTimestampsRes(timestampsRes.Data)
 			core.Info("Total time: %d\n", timestampsRes.TotalTime)
 			return
