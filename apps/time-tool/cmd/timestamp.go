@@ -76,7 +76,7 @@ var TimestampCmd = &cobra.Command{
 			}
 			core.Info("Date: %s\n", date.Format(dateTpl))
 			printTimestampsRes(timestampsRes.Data)
-			core.Info("Total time: %d\n", timestampsRes.TotalTime)
+			core.Info("Total time: %s\n", core.MinutesToTimeStr(timestampsRes.TotalTime))
 			return
 		}
 		timestamp := core.Timestamp{
