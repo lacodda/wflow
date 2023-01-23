@@ -21,7 +21,7 @@ type Error struct {
 }
 
 type Timestamp struct {
-	Id        uint          `gorm:"primaryKey"`
+	Id        uint          `json:"id"`
 	Timestamp time.Time     `json:"timestamp"`
 	Type      TimestampType `json:"type"`
 }
