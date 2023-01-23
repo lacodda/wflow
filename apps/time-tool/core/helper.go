@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -63,4 +64,17 @@ func PadLeft(in string, size int, sep string) string {
 		}
 		return padding + in
 	}
+}
+
+func CreateIfNotExists(filename string) error {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) || info.IsDir() {
+		file, err := os.Create(filename)
+		if err != nil {
+			return err
+		}
+		file.Close()
+		return nil
+	}
+	return err
 }
