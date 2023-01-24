@@ -78,3 +78,7 @@ func CreateIfNotExists(filename string) error {
 	}
 	return err
 }
+
+func ArrayToString(ints []int, sep string) string {
+	return strings.Trim(strings.Replace(fmt.Sprint(ints), " ", sep, -1), "[]")
+}
