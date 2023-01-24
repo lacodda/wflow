@@ -12,10 +12,13 @@ import (
 )
 
 const (
-	insertSQL = `INSERT INTO timestamps (timestamp, type) VALUES (?, ?)`
-	schemaSQL = `CREATE TABLE IF NOT EXISTS timestamps (
-        id INTEGER PRIMARY KEY,
-        timestamp DATETIME,
+	insertSQL     = `INSERT INTO timestamps (timestamp, type) VALUES (?, ?);`
+	selectAllSQL  = `SELECT * FROM timestamps;`
+	deleteAllSQL  = `DELETE FROM timestamps;`
+	deleteByIdSQL = `DELETE FROM timestamps WHERE id = ?;`
+	schemaSQL     = `CREATE TABLE IF NOT EXISTS timestamps (
+        id INTEGER NOT NULL PRIMARY KEY,
+        timestamp DATETIME NOT NULL,
         type VARCHAR(32));`
 )
 
@@ -81,6 +84,26 @@ func (db *DB) Flush() error {
 	return tx.Commit()
 }
 
+func (db *DB) Select() ([]core.Timestamp, error) {
+	var timestamps []core.Timestamp
+	rows, err := db.sql.Query(selectAllSQL)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var timestamp core.Timestamp
+		err = rows.Scan(&timestamp.Id, &timestamp.Timestamp, &timestamp.Type)
+		if err != nil {
+			return nil, err
+		}
+		timestamps = append(timestamps, timestamp)
+	}
+
+	return timestamps, nil
+}
+
 func (db *DB) Close() error {
 	defer func() {
 		db.stmt.Close()
@@ -104,6 +127,19 @@ func SetTimestamp(timestamp core.Timestamp) error {
 	return err
 }
 
+func GetTimestamps() ([]core.Timestamp, error) {
+	db, err := Db()
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+	timestamps, err := db.Select()
+	if err != nil {
+		return timestamps, err
+	}
+	return timestamps, nil
+}
+
 // ++++++++++++++++++++++++++++++++++++++++++
 
 func db() *gorm.DB {
@@ -113,17 +149,6 @@ func db() *gorm.DB {
 	}
 
 	return db
-}
-
-func GetTimestamps() ([]core.Timestamp, error) {
-	var timestamps []core.Timestamp
-	err := db().AutoMigrate(&core.Timestamp{})
-	if err != nil {
-		return timestamps, err
-	}
-	db().Find(&timestamps)
-
-	return timestamps, nil
 }
 
 func DeleteTimestamps() {
