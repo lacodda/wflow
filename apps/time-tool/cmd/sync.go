@@ -16,7 +16,7 @@ var SyncCmd = &cobra.Command{
 	Short: "Synchronizing local storage with the server.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(FlagSyncDelete) > 0 {
-			deletedTimestamps := api.DeleteTimestampsByIds(FlagSyncDelete)
+			deletedTimestamps, _ := api.DeleteTimestampsByIds(FlagSyncDelete)
 			if len(deletedTimestamps) == 0 {
 				core.Danger("No records for deleting!\n")
 				return

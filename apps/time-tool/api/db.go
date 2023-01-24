@@ -5,18 +5,17 @@ import (
 	"errors"
 	"finlab/apps/time-tool/config"
 	"finlab/apps/time-tool/core"
+	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
 const (
-	insertSQL     = `INSERT INTO timestamps (timestamp, type) VALUES (?, ?);`
-	selectAllSQL  = `SELECT * FROM timestamps;`
-	deleteAllSQL  = `DELETE FROM timestamps;`
-	deleteByIdSQL = `DELETE FROM timestamps WHERE id = ?;`
-	schemaSQL     = `CREATE TABLE IF NOT EXISTS timestamps (
+	insertSql    = `INSERT INTO timestamps (timestamp, type) VALUES (?, ?);`
+	selectSql    = `SELECT * FROM timestamps`
+	deleteSql    = `DELETE FROM timestamps`
+	whereIdInSql = `WHERE id IN (%s)`
+	schemaSql    = `CREATE TABLE IF NOT EXISTS timestamps (
         id INTEGER NOT NULL PRIMARY KEY,
         timestamp DATETIME NOT NULL,
         type VARCHAR(32));`
@@ -34,11 +33,11 @@ func Db() (*DB, error) {
 		return nil, err
 	}
 
-	if _, err = sqlDB.Exec(schemaSQL); err != nil {
+	if _, err = sqlDB.Exec(schemaSql); err != nil {
 		return nil, err
 	}
 
-	stmt, err := sqlDB.Prepare(insertSQL)
+	stmt, err := sqlDB.Prepare(insertSql)
 	if err != nil {
 		return nil, err
 	}
@@ -84,26 +83,6 @@ func (db *DB) Flush() error {
 	return tx.Commit()
 }
 
-func (db *DB) Select() ([]core.Timestamp, error) {
-	var timestamps []core.Timestamp
-	rows, err := db.sql.Query(selectAllSQL)
-
-	if err != nil {
-		return nil, err
-	}
-
-	for rows.Next() {
-		var timestamp core.Timestamp
-		err = rows.Scan(&timestamp.Id, &timestamp.Timestamp, &timestamp.Type)
-		if err != nil {
-			return nil, err
-		}
-		timestamps = append(timestamps, timestamp)
-	}
-
-	return timestamps, nil
-}
-
 func (db *DB) Close() error {
 	defer func() {
 		db.stmt.Close()
@@ -117,12 +96,54 @@ func (db *DB) Close() error {
 	return nil
 }
 
+func (db *DB) Select(ids ...[]int) ([]core.Timestamp, error) {
+	var timestamps []core.Timestamp
+	var query = selectSql
+
+	if len(ids) > 0 && ids[0] != nil {
+		query = fmt.Sprintf("%s %s", selectSql, fmt.Sprintf(whereIdInSql, core.ArrayToString(ids[0], ",")))
+	}
+
+	rows, err := db.sql.Query(query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var timestamp core.Timestamp
+		err = rows.Scan(&timestamp.Id, &timestamp.Timestamp, &timestamp.Type)
+		if err != nil {
+			return nil, err
+		}
+		timestamps = append(timestamps, timestamp)
+	}
+
+	return timestamps, nil
+}
+
+func (db *DB) Delete(ids ...[]int) error {
+	var query = deleteSql
+
+	if len(ids) > 0 && ids[0] != nil {
+		query = fmt.Sprintf("%s %s", deleteSql, fmt.Sprintf(whereIdInSql, core.ArrayToString(ids[0], ",")))
+	}
+
+	_, err := db.sql.Exec(query)
+
+	return err
+}
+
 func SetTimestamp(timestamp core.Timestamp) error {
 	db, err := Db()
 	if err != nil {
 		return err
 	}
+
 	defer db.Close()
+
 	err = db.Add(timestamp)
 	return err
 }
@@ -132,32 +153,44 @@ func GetTimestamps() ([]core.Timestamp, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer db.Close()
+
 	timestamps, err := db.Select()
 	if err != nil {
 		return timestamps, err
 	}
+
 	return timestamps, nil
 }
 
-// ++++++++++++++++++++++++++++++++++++++++++
-
-func db() *gorm.DB {
-	db, err := gorm.Open(sqlite.Open(config.DbPath()), &gorm.Config{})
+func DeleteTimestampsByIds(ids []int) ([]core.Timestamp, error) {
+	db, err := Db()
 	if err != nil {
-		panic("Failed to open the SQLite database!")
+		return nil, err
 	}
 
-	return db
+	timestamps, err := db.Select(ids)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Delete(ids)
+	if err != nil {
+		return nil, err
+	}
+
+	return timestamps, nil
 }
 
-func DeleteTimestamps() {
-	db().Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&core.Timestamp{})
-}
+func DeleteTimestamps() error {
+	db, err := Db()
+	if err != nil {
+		return err
+	}
 
-func DeleteTimestampsByIds(ids []int) []core.Timestamp {
-	var timestamps []core.Timestamp
-	db().Where(ids).Find(&timestamps)
-	db().Delete(&core.Timestamp{}, ids)
-	return timestamps
+	err = db.Delete()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
