@@ -36,6 +36,7 @@ func init() {
 	rootCmd.AddCommand(LogoutCmd)
 	rootCmd.AddCommand(TimestampCmd)
 	rootCmd.AddCommand(SyncCmd)
+	rootCmd.AddCommand(ReportCmd)
 
 	TimestampCmd.Flags().VarP(&FlagTimestampType, "type", "t", `Type of timestamp. Allowed: "Start", "End", "StartBreak", "EndBreak"`)
 	TimestampCmd.Flags().BoolVarP(&FlagTimestampShow, "show", "s", false, "Show a list of timestamps for the selected day")
