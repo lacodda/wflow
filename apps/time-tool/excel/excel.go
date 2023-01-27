@@ -45,6 +45,13 @@ var (
 		{"D9", "D11"},
 		{"B12", "D12"},
 	}
+	// formulas
+	formulaCells = [][]string{
+		{"E9", "=C9-B9"},
+		{"E10", "=C10-B10"},
+		{"E11", "=C11-B11"},
+		{"E12", "=SUM(E9:E11)"},
+	}
 	// time cells
 	timeCells = []string{"B9", "C9", "B10", "C10", "B11", "C11"}
 	// text
@@ -60,7 +67,7 @@ var (
 	resultText       = "Результат"
 )
 
-func textStyle(size float64, bold bool, italic bool, alignment []string, fill bool, border []int) *excelize.Style {
+func cellStyle(size float64, bold bool, italic bool, alignment []string, fill bool, border []int) *excelize.Style {
 	style := &excelize.Style{
 		Alignment: &excelize.Alignment{Vertical: alignment[0], Horizontal: alignment[1]},
 		Font:      &excelize.Font{Color: "000000", Family: "Verdana", Size: size, Italic: italic, Bold: bold},
@@ -68,7 +75,9 @@ func textStyle(size float64, bold bool, italic bool, alignment []string, fill bo
 	if fill {
 		style.Fill = excelize.Fill{Type: "pattern", Color: []string{"#B2B2B2"}, Pattern: 1}
 	}
-
+	if bold {
+		style.NumFmt = 20
+	}
 	if len(border) > 0 {
 		style.Border = []excelize.Border{
 			{Type: "top", Style: border[0], Color: "000000"},
@@ -84,14 +93,14 @@ func textStyle(size float64, bold bool, italic bool, alignment []string, fill bo
 func SeveXlsx(date time.Time, timestampsRes core.TimestampsRes) error {
 	xlsx := excelize.NewFile()
 
-	h1Style, _ := xlsx.NewStyle(textStyle(14, true, false, []string{"center", "center"}, false, []int{}))
-	h2Style, _ := xlsx.NewStyle(textStyle(14, false, false, []string{"center", "center"}, false, []int{}))
-	h3Style, _ := xlsx.NewStyle(textStyle(10, true, false, []string{"center", "center"}, false, []int{}))
-	h4Style, _ := xlsx.NewStyle(textStyle(8, false, false, []string{"center", "center"}, false, []int{}))
-	h4IStyle, _ := xlsx.NewStyle(textStyle(8, false, true, []string{"center", "right"}, false, []int{}))
-	tableHeadStyle, _ := xlsx.NewStyle(textStyle(10, true, false, []string{"center", "center"}, true, []int{2, 2, 2, 2}))
-	tableBodyStyle, _ := xlsx.NewStyle(textStyle(10, true, false, []string{"center", "center"}, false, []int{1, 2, 1, 2}))
-	tableBodyContentStyle, _ := xlsx.NewStyle(textStyle(10, false, false, []string{"top", "left"}, false, []int{2, 2, 2, 2}))
+	h1Style, _ := xlsx.NewStyle(cellStyle(14, true, false, []string{"center", "center"}, false, []int{}))
+	h2Style, _ := xlsx.NewStyle(cellStyle(14, false, false, []string{"center", "center"}, false, []int{}))
+	h3Style, _ := xlsx.NewStyle(cellStyle(10, true, false, []string{"center", "center"}, false, []int{}))
+	h4Style, _ := xlsx.NewStyle(cellStyle(8, false, false, []string{"center", "center"}, false, []int{}))
+	h4IStyle, _ := xlsx.NewStyle(cellStyle(8, false, true, []string{"center", "right"}, false, []int{}))
+	tableHeadStyle, _ := xlsx.NewStyle(cellStyle(10, true, false, []string{"center", "center"}, true, []int{2, 2, 2, 2}))
+	tableBodyStyle, _ := xlsx.NewStyle(cellStyle(10, true, false, []string{"center", "center"}, false, []int{1, 2, 1, 2}))
+	tableBodyContentStyle, _ := xlsx.NewStyle(cellStyle(10, false, false, []string{"top", "left"}, false, []int{2, 2, 2, 2}))
 
 	dateString := date.Format(core.DateDotTpl)
 	fileName := "Report_" + date.Format(core.DateFileTpl) + "_.xlsx"
@@ -184,7 +193,11 @@ func SeveXlsx(date time.Time, timestampsRes core.TimestampsRes) error {
 		}
 	}
 
-	//  core.MinutesToTimeStr(timestampsRes.TotalTime)
+	// formulas
+	for _, formulaCell := range formulaCells {
+		xlsx.SetCellFormula(sheet, formulaCell[0], formulaCell[1])
+		xlsx.CalcCellValue(sheet, formulaCell[0])
+	}
 
 	// Zoom
 	if err := xlsx.SetSheetView(sheet, -1, &excelize.ViewOptions{
