@@ -45,14 +45,10 @@ func (e *TimestampType) Type() string {
 	return "type"
 }
 
-var FlagTimestampType = StartBreak
-var FlagTimestampShow = false
-var FlagTimestampDate = ""
-
-const (
-	dateTpl    = "2006-01-02"
-	dateISOTpl = "2006-01-02T15:04:05Z"
-	timeTpl    = "15:04"
+var (
+	FlagTimestampType = StartBreak
+	FlagTimestampShow = false
+	FlagTimestampDate = ""
 )
 
 var TimestampCmd = &cobra.Command{
@@ -63,7 +59,7 @@ var TimestampCmd = &cobra.Command{
 			var date = time.Now()
 			if len(FlagTimestampDate) > 0 {
 				var err error
-				date, err = time.Parse(dateTpl, FlagTimestampDate)
+				date, err = time.Parse(core.DateTpl, FlagTimestampDate)
 				if err != nil {
 					core.Danger("Error: %v\n", err.Error())
 					return
@@ -74,7 +70,7 @@ var TimestampCmd = &cobra.Command{
 				core.Danger("Error: %v\n", err.Error())
 				return
 			}
-			core.Info("Date: %s\n", date.Format(dateTpl))
+			core.Info("Date: %s\n", date.Format(core.DateTpl))
 			printTimestampsRes(timestampsRes.Data)
 			core.Info("Total time: %s\n", core.MinutesToTimeStr(timestampsRes.TotalTime))
 			return
@@ -91,7 +87,7 @@ var TimestampCmd = &cobra.Command{
 				core.Danger("Error: %v\n", err.Error())
 			}
 			core.Success("Timestamp saved in local database\n")
-			core.Info("Timestamp (%s): %s\n", timestamp.Type, timestamp.Timestamp.Format(dateISOTpl))
+			core.Info("Timestamp (%s): %s\n", timestamp.Type, timestamp.Timestamp.Format(core.DateISOTpl))
 			return
 		}
 
@@ -101,7 +97,7 @@ var TimestampCmd = &cobra.Command{
 
 func printTimestampsRes(timestamps []core.TimestampReq) {
 	for key, timestamp := range timestamps {
-		time, _ := time.Parse(dateISOTpl, timestamp.Timestamp)
-		core.Info("[%d] %s (%s)\n", key+1, time.Format(timeTpl), timestamp.Type)
+		time, _ := time.Parse(core.DateISOTpl, timestamp.Timestamp)
+		core.Info("[%d] %s (%s)\n", key+1, time.Format(core.TimeTpl), timestamp.Type)
 	}
 }
