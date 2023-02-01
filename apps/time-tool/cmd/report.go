@@ -34,7 +34,7 @@ var ReportCmd = &cobra.Command{
 				core.Danger("Error: %v\n", err.Error())
 			}
 		}
-		timestampsRes, err := api.PullTimestamps(date)
+		timestampsRes, err := api.PullTimestamps(date, false)
 		if err != nil {
 			core.Danger("Error: %v\n", err.Error())
 			return

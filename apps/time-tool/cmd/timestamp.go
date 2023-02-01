@@ -48,6 +48,7 @@ func (e *TimestampType) Type() string {
 var (
 	FlagTimestampType = StartBreak
 	FlagTimestampShow = false
+	FlagTimestampRaw  = false
 	FlagTimestampDate = ""
 )
 
@@ -65,7 +66,7 @@ var TimestampCmd = &cobra.Command{
 					return
 				}
 			}
-			timestampsRes, err := api.PullTimestamps(date)
+			timestampsRes, err := api.PullTimestamps(date, FlagTimestampRaw)
 			if err != nil {
 				core.Danger("Error: %v\n", err.Error())
 				return

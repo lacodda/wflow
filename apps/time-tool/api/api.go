@@ -6,6 +6,7 @@ import (
 	"errors"
 	"finlab/apps/time-tool/config"
 	"finlab/apps/time-tool/core"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -88,11 +89,11 @@ func PushTimestamp(timestamp core.Timestamp) (core.TimestampRes, error) {
 	return timestampRes, nil
 }
 
-func PullTimestamps(date time.Time) (core.TimestampsRes, error) {
+func PullTimestamps(date time.Time, raw bool) (core.TimestampsRes, error) {
 	timestampsRes := core.TimestampsRes{}
 
 	jsonStr := []byte("")
-	req := GetReq(core.Get, "/api/work-time/timestamp?date="+date.Format("2006-01-02"), jsonStr)
+	req := GetReq(core.Get, fmt.Sprintf("/api/work-time/timestamp?date=%s&raw=%v", date.Format("2006-01-02"), raw), jsonStr)
 	body, resp, err := GetBody(req)
 
 	if err != nil {
