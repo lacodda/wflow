@@ -111,3 +111,55 @@ func PullTimestamps(date time.Time, raw bool) (core.TimestampsRes, error) {
 
 	return timestampsRes, nil
 }
+
+func PushTask(task core.Task) (core.TaskRes, error) {
+	taskRes := core.TaskRes{}
+	reqBody, _ := json.Marshal(&core.TaskReq{
+		Date:         task.Date,
+		Name:         task.Name,
+		Comment:      task.Comment,
+		Completeness: task.Completeness,
+	})
+
+	jsonStr := []byte(string(reqBody))
+	req := GetReq(core.Post, "/api/work-time/task", jsonStr)
+	body, resp, err := GetBody(req)
+
+	if err != nil {
+		return taskRes, err
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+		err := core.Error{}
+		json.Unmarshal([]byte(body), &err)
+
+		return taskRes, errors.New(err.Message)
+	}
+
+	json.Unmarshal([]byte(body), &taskRes)
+
+	return taskRes, nil
+}
+
+func PullTasks(from time.Time, to time.Time) (core.TasksRes, error) {
+	tasksRes := core.TasksRes{}
+
+	jsonStr := []byte("")
+	req := GetReq(core.Get, fmt.Sprintf("/api/work-time/task?from=%s&to=%s", from.Format(core.DateISOTpl), to.Format(core.DateISOTpl)), jsonStr)
+	body, resp, err := GetBody(req)
+
+	if err != nil {
+		return tasksRes, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err := core.Error{}
+		json.Unmarshal([]byte(body), &err)
+
+		return tasksRes, errors.New(err.Message)
+	}
+
+	json.Unmarshal([]byte(body), &tasksRes)
+
+	return tasksRes, nil
+}
