@@ -63,6 +63,30 @@ const (
 	EndBreak   TimestampType = "EndBreak"
 )
 
+type Task struct {
+	Id                 string    `json:"_id"`
+	Date               time.Time `json:"date"`
+	Name               string    `json:"name"`
+	Comment            string    `json:"comment"`
+	Completeness       float64   `json:"completeness"`
+	ExcludedFromSearch bool      `json:"excludedFromSearch"`
+}
+
+type TaskReq struct {
+	Date         time.Time `json:"date"`
+	Name         string    `json:"name"`
+	Comment      string    `json:"comment"`
+	Completeness float64   `json:"completeness"`
+}
+
+type TaskRes struct {
+	Data Task `json:"data"`
+}
+
+type TasksRes struct {
+	Data []Task `json:"data"`
+}
+
 func (c Method) ToString() string {
 	return fmt.Sprintf("%s", c)
 }
