@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 const padLimit = 8192
@@ -81,4 +82,13 @@ func CreateIfNotExists(filename string) error {
 
 func ArrayToString(ints []int, sep string) string {
 	return strings.Trim(strings.Replace(fmt.Sprint(ints), " ", sep, -1), "[]")
+}
+
+func DayRange(date time.Time) (from time.Time, to time.Time) {
+	currentYear, currentMonth, currentDay := date.Date()
+	currentLocation := date.Location()
+
+	from = time.Date(currentYear, currentMonth, currentDay, 0, 0, 0, 0, currentLocation)
+	to = time.Date(currentYear, currentMonth, currentDay, 23, 59, 59, 999, currentLocation)
+	return
 }
