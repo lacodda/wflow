@@ -35,6 +35,7 @@ func init() {
 	rootCmd.AddCommand(LoginCmd)
 	rootCmd.AddCommand(LogoutCmd)
 	rootCmd.AddCommand(TimestampCmd)
+	rootCmd.AddCommand(TaskCmd)
 	rootCmd.AddCommand(SyncCmd)
 	rootCmd.AddCommand(ReportCmd)
 
@@ -42,6 +43,8 @@ func init() {
 	TimestampCmd.Flags().BoolVarP(&FlagTimestampShow, "show", "s", false, "Show a list of timestamps for the selected day")
 	TimestampCmd.Flags().BoolVarP(&FlagTimestampRaw, "raw", "r", false, "Show a raw list of timestamps for the selected day")
 	TimestampCmd.Flags().StringVarP(&FlagTimestampDate, "date", "d", "", `Select a date to display: e.g. "2023-01-19"`)
+	TaskCmd.Flags().BoolVarP(&FlagTaskShow, "show", "s", false, "Show a list of tasks for the selected day")
+	TaskCmd.Flags().StringVarP(&FlagTaskDate, "date", "d", "", `Select a date to display: e.g. "2023-01-19"`)
 	SyncCmd.Flags().BoolVarP(&FlagSyncShow, "show", "s", false, "Show records for synchronizing with the server")
 	SyncCmd.Flags().IntSliceVarP(&FlagSyncDelete, "delete", "D", []int{}, "ID records for deleting")
 	ReportCmd.Flags().StringVarP(&FlagReportDate, "date", "d", "", `Select a date to display: e.g. "2023-01-19"`)
