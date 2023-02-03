@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/fatih/color v1.13.0 // indirect
+	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/mattn/go-colorable v0.1.9 // indirect
