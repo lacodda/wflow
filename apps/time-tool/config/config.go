@@ -3,14 +3,17 @@ package config
 import (
 	"encoding/json"
 	"finlab/apps/time-tool/core"
+	"finlab/apps/time-tool/mail"
 	"path/filepath"
 
 	"github.com/shibukawa/configdir"
 )
 
 type Config struct {
-	Login   string `json:"login"`
-	ApiHost string `json:"apiHost"`
+	Login    string    `json:"login"`
+	ApiHost  string    `json:"apiHost"`
+	Mail     mail.Mail `json:"mail"`
+	TestMail mail.Mail `json:"testMail"`
 }
 
 var DefaultConfig = Config{

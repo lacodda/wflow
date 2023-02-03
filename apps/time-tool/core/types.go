@@ -37,6 +37,8 @@ type TimestampRes struct {
 
 type TimestampsRes struct {
 	Data      []TimestampReq `json:"data"`
+	WorkTime  []int          `json:"workTime"`
+	Breaks    []int          `json:"breaks"`
 	TotalTime int            `json:"totalTime"`
 }
 
