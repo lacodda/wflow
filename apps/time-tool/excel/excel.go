@@ -2,6 +2,8 @@ package excel
 
 import (
 	"finlab/apps/time-tool/core"
+	"fmt"
+	"strings"
 	"time"
 
 	excelize "github.com/xuri/excelize/v2"
@@ -45,13 +47,8 @@ var (
 		{"D9", "D11"},
 		{"B12", "D12"},
 	}
-	// formulas
-	formulaCells = [][]string{
-		{"E9", "=C9-B9"},
-		{"E10", "=C10-B10"},
-		{"E11", "=C11-B11"},
-		{"E12", "=SUM(E9:E11)"},
-	}
+	// result
+	resultCells = []string{"E9", "E10", "E11"}
 	// time cells
 	timeCells = []string{"B9", "C9", "B10", "C10", "B11", "C11"}
 	// text
@@ -69,7 +66,7 @@ var (
 
 func cellStyle(size float64, bold bool, italic bool, alignment []string, fill bool, border []int) *excelize.Style {
 	style := &excelize.Style{
-		Alignment: &excelize.Alignment{Vertical: alignment[0], Horizontal: alignment[1]},
+		Alignment: &excelize.Alignment{Vertical: alignment[0], Horizontal: alignment[1], WrapText: true},
 		Font:      &excelize.Font{Color: "000000", Family: "Verdana", Size: size, Italic: italic, Bold: bold},
 	}
 	if fill {
@@ -90,8 +87,10 @@ func cellStyle(size float64, bold bool, italic bool, alignment []string, fill bo
 	return style
 }
 
-func SeveXlsx(date time.Time, timestampsRes core.TimestampsRes) error {
+func SeveXlsx(date time.Time, timestampsRes core.TimestampsRes, tasksRes core.TasksRes) (fileName string, err error) {
+	fileName = "Report_" + date.Format(core.DateFileTpl) + ".xlsx"
 	xlsx := excelize.NewFile()
+	xlsx.SetDocProps(&excelize.DocProperties{Creator: "Kirill Lahtachev"})
 
 	h1Style, _ := xlsx.NewStyle(cellStyle(14, true, false, []string{"center", "center"}, false, []int{}))
 	h2Style, _ := xlsx.NewStyle(cellStyle(14, false, false, []string{"center", "center"}, false, []int{}))
@@ -103,7 +102,6 @@ func SeveXlsx(date time.Time, timestampsRes core.TimestampsRes) error {
 	tableBodyContentStyle, _ := xlsx.NewStyle(cellStyle(10, false, false, []string{"top", "left"}, false, []int{2, 2, 2, 2}))
 
 	dateString := date.Format(core.DateDotTpl)
-	fileName := "Report_" + date.Format(core.DateFileTpl) + "_.xlsx"
 	weekday := int(date.Weekday())
 	isWeekend := weekday < 1 || weekday > 5
 	dayType := 0
@@ -116,21 +114,21 @@ func SeveXlsx(date time.Time, timestampsRes core.TimestampsRes) error {
 	// set custom row height
 	for row, height := range heights {
 		if err = xlsx.SetRowHeight(sheet, row, height); err != nil {
-			return err
+			return
 		}
 	}
 
 	// set custom column width
 	for _, width := range widths {
 		if err = xlsx.SetColWidth(sheet, width[0].(string), width[1].(string), width[2].(float64)); err != nil {
-			return err
+			return
 		}
 	}
 
 	// merge cells
 	for _, mergeCell := range mergeCells {
 		if err = xlsx.MergeCell(sheet, mergeCell[0], mergeCell[1]); err != nil {
-			return err
+			return
 		}
 	}
 
@@ -189,34 +187,43 @@ func SeveXlsx(date time.Time, timestampsRes core.TimestampsRes) error {
 	for key, timestamp := range timestampsRes.Data {
 		t, _ := time.Parse(core.DateISOTpl, timestamp.Timestamp)
 		if err = xlsx.SetCellValue(sheet, timeCells[key], t.Format(core.TimeTpl)); err != nil {
-			return err
+			return
 		}
 	}
 
-	// formulas
-	for _, formulaCell := range formulaCells {
-		xlsx.SetCellFormula(sheet, formulaCell[0], formulaCell[1])
-		xlsx.CalcCellValue(sheet, formulaCell[0])
+	var tasks []string
+	for _, task := range tasksRes.Data {
+		tasks = append(tasks, fmt.Sprintf("* %s (%v%%)", task.Name, task.Completeness))
 	}
+	tasksString := strings.Join(tasks, "\n")
+	xlsx.SetCellValue(sheet, "D9", tasksString)
+
+	// result
+	for key, minutes := range timestampsRes.WorkTime {
+		if err = xlsx.SetCellValue(sheet, resultCells[key], core.MinutesToTimeStr(minutes)); err != nil {
+			return
+		}
+	}
+	xlsx.SetCellValue(sheet, "E12", core.MinutesToTimeStr(timestampsRes.TotalTime))
 
 	// Zoom
-	if err := xlsx.SetSheetView(sheet, -1, &excelize.ViewOptions{
+	if err = xlsx.SetSheetView(sheet, -1, &excelize.ViewOptions{
 		ZoomScale: &zoom,
 	}); err != nil {
-		return err
+		return
 	}
 
 	// rename worksheet
 	xlsx.SetSheetName(sheet, dateString)
 
-	if err := xlsx.SaveAs(fileName); err != nil {
-		return err
+	if err = xlsx.SaveAs(fileName); err != nil {
+		return
 	}
 
-	if err := xlsx.Close(); err != nil {
-		return err
+	if err = xlsx.Close(); err != nil {
+		return
 	}
 
 	core.Success("Excel document is saved!\n")
-	return nil
+	return fileName, nil
 }
