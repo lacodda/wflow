@@ -2,14 +2,21 @@ package cmd
 
 import (
 	"finlab/apps/time-tool/api"
+	"finlab/apps/time-tool/config"
 	"finlab/apps/time-tool/core"
 	"finlab/apps/time-tool/excel"
+	"finlab/apps/time-tool/mail"
+	"fmt"
 	"time"
 
 	"github.com/spf13/cobra"
 )
 
-var FlagReportDate = ""
+var (
+	FlagReportDate     = ""
+	FlagReportSend     = false
+	FlagReportTestSend = false
+)
 
 var ReportCmd = &cobra.Command{
 	Use:   "report",
@@ -40,14 +47,40 @@ var ReportCmd = &cobra.Command{
 			return
 		}
 
-		core.Info("Date: %s\n", date.Format(core.DateTpl))
+		from, to := core.DayRange(date)
+		tasksRes, err := api.PullTasks(from, to)
+		if err != nil {
+			core.Danger("Error: %v\n", err.Error())
+			return
+		}
+
+		core.Info("Date: %s\n", date.Format(core.DateDotTpl))
+		core.Info("Timestamps:\n")
+		core.Info("=========================================================\n")
 		printTimestampsRes(timestampsRes.Data)
 		core.Info("Total time: %s\n", core.MinutesToTimeStr(timestampsRes.TotalTime))
+		core.Info("=========================================================\n")
+		core.Info("Tasks:\n")
+		core.Info("=========================================================\n")
+		printTaskRes(tasksRes.Data)
 
-		if err := excel.SeveXlsx(date, timestampsRes); err != nil {
+		fileName, err := excel.SeveXlsx(date, timestampsRes, tasksRes)
+		if err != nil {
 			core.Danger("Error: %s\n", err.Error())
 		}
 
-		core.Success("You've been logged out!\n")
+		if FlagReportSend {
+			var mailObj = config.ReadConfig().Mail
+			mailObj.Subject = fmt.Sprintf(config.ReadConfig().Mail.Subject, date.Format(core.DateDotTpl), core.MinutesToTimeStr(timestampsRes.TotalTime))
+			if FlagReportTestSend {
+				mailObj = config.ReadConfig().TestMail
+				mailObj.Subject = fmt.Sprintf(config.ReadConfig().TestMail.Subject, date.Format(core.DateDotTpl), core.MinutesToTimeStr(timestampsRes.TotalTime))
+			}
+			mailObj.Attachments = fileName
+			msg := mail.CreateMail(mailObj)
+			mail.SendMail(msg)
+			core.Success("Your report %s has been sent to %s!\n", fileName, mailObj.To)
+		}
+
 	},
 }

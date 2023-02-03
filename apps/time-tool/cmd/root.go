@@ -48,4 +48,6 @@ func init() {
 	SyncCmd.Flags().BoolVarP(&FlagSyncShow, "show", "s", false, "Show records for synchronizing with the server")
 	SyncCmd.Flags().IntSliceVarP(&FlagSyncDelete, "delete", "D", []int{}, "ID records for deleting")
 	ReportCmd.Flags().StringVarP(&FlagReportDate, "date", "d", "", `Select a date to display: e.g. "2023-01-19"`)
+	ReportCmd.Flags().BoolVar(&FlagReportSend, "send", false, "Send report")
+	ReportCmd.Flags().BoolVar(&FlagReportTestSend, "test", false, "Send test report")
 }
