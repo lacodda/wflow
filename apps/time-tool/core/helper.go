@@ -92,3 +92,13 @@ func DayRange(date time.Time) (from time.Time, to time.Time) {
 	to = time.Date(currentYear, currentMonth, currentDay, 23, 59, 59, 999, currentLocation)
 	return
 }
+
+func LaskWeekRange() (from time.Time, to time.Time) {
+	date := time.Now()
+	currentYear, currentMonth, currentDay := date.Date()
+	currentLocation := date.Location()
+
+	from = time.Date(currentYear, currentMonth, currentDay-7, 0, 0, 0, 0, currentLocation)
+	to = time.Date(currentYear, currentMonth, currentDay-1, 23, 59, 59, 999, currentLocation)
+	return
+}
