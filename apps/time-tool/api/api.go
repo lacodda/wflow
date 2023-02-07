@@ -112,14 +112,9 @@ func PullTimestamps(date time.Time, raw bool) (core.TimestampsRes, error) {
 	return timestampsRes, nil
 }
 
-func PushTask(task core.Task) (core.TaskRes, error) {
+func PushTask(task core.TaskReq) (core.TaskRes, error) {
 	taskRes := core.TaskRes{}
-	reqBody, _ := json.Marshal(&core.TaskReq{
-		Date:         task.Date,
-		Name:         task.Name,
-		Comment:      task.Comment,
-		Completeness: task.Completeness,
-	})
+	reqBody, _ := json.Marshal(task)
 
 	jsonStr := []byte(string(reqBody))
 	req := GetReq(core.Post, "/api/work-time/task", jsonStr)
@@ -141,11 +136,11 @@ func PushTask(task core.Task) (core.TaskRes, error) {
 	return taskRes, nil
 }
 
-func PullTasks(from time.Time, to time.Time) (core.TasksRes, error) {
+func PullTasks(from time.Time, to time.Time, incomplete bool) (core.TasksRes, error) {
 	tasksRes := core.TasksRes{}
 
 	jsonStr := []byte("")
-	req := GetReq(core.Get, fmt.Sprintf("/api/work-time/task?from=%s&to=%s", from.Format(core.DateISOTpl), to.Format(core.DateISOTpl)), jsonStr)
+	req := GetReq(core.Get, fmt.Sprintf("/api/work-time/task?from=%s&to=%s&incomplete=%v", from.Format(core.DateISOTpl), to.Format(core.DateISOTpl), incomplete), jsonStr)
 	body, resp, err := GetBody(req)
 
 	if err != nil {

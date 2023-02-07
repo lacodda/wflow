@@ -48,7 +48,7 @@ var ReportCmd = &cobra.Command{
 		}
 
 		from, to := core.DayRange(date)
-		tasksRes, err := api.PullTasks(from, to)
+		tasksRes, err := api.PullTasks(from, to, false)
 		if err != nil {
 			core.Danger("Error: %v\n", err.Error())
 			return
