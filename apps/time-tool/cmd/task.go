@@ -1,18 +1,20 @@
 package cmd
 
 import (
-	"errors"
 	"finlab/apps/time-tool/api"
 	"finlab/apps/time-tool/core"
-	"strconv"
+	"finlab/apps/time-tool/validator"
+	"fmt"
+	"regexp"
 	"time"
 
-	"github.com/manifoldco/promptui"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 )
 
 var (
 	FlagTaskShow = false
+	FlagTaskFind = false
 	FlagTaskDate = ""
 )
 
@@ -31,49 +33,22 @@ var TaskCmd = &cobra.Command{
 		}
 
 		if FlagTaskShow {
-			from, to := core.DayRange(date)
-			tasksRes, err := api.PullTasks(from, to)
-			if err != nil {
-				core.Danger("Error: %v\n", err.Error())
-				return
-			}
-			core.Info("Date: %s\n", date.Format(core.DateTpl))
-			printTaskRes(tasksRes.Data)
+			show(date)
+			return
+		} else if FlagTaskFind {
+			findAndPush(date)
 			return
 		}
 
-		namePrompt := promptui.Prompt{
-			Label:    "Task name",
-			Validate: validateTaskName,
-		}
+		taskReq := core.TaskReq{}
+		taskReq.Date = date
 
-		commentPrompt := promptui.Prompt{
-			Label: "Task comment",
-		}
-
-		completenessPrompt := promptui.Prompt{
-			Label:    "Task completeness",
-			Validate: validateNumber,
-		}
-
-		name, errN := namePrompt.Run()
-		comment, errCt := commentPrompt.Run()
-		completeness, errCs := completenessPrompt.Run()
-		promptErr := core.NotNil(errN, errCt, errCs)
-
-		if promptErr != nil {
-			core.Danger("Prompt failed: %v\n", promptErr)
+		err := survey.Ask(getQuestions(core.TaskReq{Completeness: 100}), &taskReq)
+		if err != nil {
+			core.Danger("Prompt failed: %v\n", err.Error())
 			return
 		}
-
-		completenessFloat, _ := strconv.ParseFloat(completeness, 64)
-
-		taskRes, err := api.PushTask(core.Task{
-			Date:         date,
-			Name:         name,
-			Comment:      comment,
-			Completeness: completenessFloat,
-		})
+		taskRes, err := api.PushTask(taskReq)
 
 		if err != nil {
 			core.Danger("Error: %v\n", err.Error())
@@ -84,19 +59,91 @@ var TaskCmd = &cobra.Command{
 	},
 }
 
-func validateTaskName(input string) error {
-	if len(input) < 3 {
-		return errors.New("Task name must have more than 3 characters")
+func getQuestions(taskReq core.TaskReq) []*survey.Question {
+	return []*survey.Question{
+		{
+			Name:      "name",
+			Prompt:    &survey.Input{Message: "Task name", Default: taskReq.Name},
+			Validate:  survey.Required,
+			Transform: survey.Title,
+		},
+		{
+			Name:   "comment",
+			Prompt: &survey.Input{Message: "Task comment", Default: taskReq.Comment},
+		},
+		{
+			Name:     "completeness",
+			Prompt:   &survey.Input{Message: "Task completeness", Default: fmt.Sprintf("%v", taskReq.Completeness)},
+			Validate: validator.IsNumber,
+		},
 	}
-	return nil
 }
 
-func validateNumber(input string) error {
-	_, err := strconv.ParseFloat(input, 64)
-	if err != nil {
-		return errors.New("Invalid number")
+func getSelectTasks(taskNames []string) []*survey.Question {
+	return []*survey.Question{
+		{
+			Name:   "name",
+			Prompt: &survey.MultiSelect{Message: "Choose a tasks", Options: taskNames},
+		},
 	}
-	return nil
+}
+
+func show(date time.Time) {
+	from, to := core.DayRange(date)
+	tasksRes, err := api.PullTasks(from, to, false)
+	if err != nil {
+		core.Danger("Error: %v\n", err.Error())
+		return
+	}
+	core.Info("Date: %s\n", date.Format(core.DateTpl))
+	printTaskRes(tasksRes.Data)
+}
+
+func findAndPush(date time.Time) {
+	from, to := core.LaskWeekRange()
+	tasksRes, err := api.PullTasks(from, to, true)
+	if err != nil {
+		core.Danger("Error: %v\n", err.Error())
+		return
+	}
+
+	selectedTaskNames := []string{}
+	taskNames := make([]string, len(tasksRes.Data))
+
+	for key, task := range tasksRes.Data {
+		taskNames[key] = fmt.Sprintf("%s (Completeness: %v%%)", task.Name, task.Completeness)
+	}
+
+	survey.Ask(getSelectTasks(taskNames), &selectedTaskNames)
+	re := regexp.MustCompile(`(.+)\s\(\w+:\s.+\)`)
+
+	for _, n := range selectedTaskNames {
+		task := tasksRes.FindByName(re.FindStringSubmatch(n)[1])
+		taskReq := core.TaskReq{}
+		taskReq.Date = date
+
+		err := survey.Ask(getQuestions(core.TaskReq{
+			Name:         task.Name,
+			Comment:      task.Comment,
+			Completeness: task.Completeness + 1,
+		}), &taskReq)
+
+		if err != nil {
+			core.Danger("Prompt failed: %v\n", err.Error())
+			return
+		}
+
+		taskRes, err := api.PushTask(taskReq)
+
+		if err != nil {
+			core.Danger("Error: %v\n", err.Error())
+			return
+		}
+
+		core.Info("Task: %s (Completeness: %v%%)\n", taskRes.Data.Name, taskRes.Data.Completeness)
+	}
+
+	core.Info("Selected tasks saved with date: %s\n", date.Format(core.DateTpl))
 }
 
 func printTaskRes(tasks []core.Task) {

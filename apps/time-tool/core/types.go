@@ -92,3 +92,12 @@ type TasksRes struct {
 func (c Method) ToString() string {
 	return fmt.Sprintf("%s", c)
 }
+
+func (tasksRes *TasksRes) FindByName(name string) Task {
+	for _, task := range tasksRes.Data {
+		if task.Name == name {
+			return task
+		}
+	}
+	return Task{}
+}
