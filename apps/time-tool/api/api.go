@@ -34,12 +34,9 @@ func GetBody(req *http.Request) ([]byte, *http.Response, error) {
 	return body, resp, nil
 }
 
-func SignIn(email string, password string) (core.AccessToken, error) {
+func SignIn(credentials core.Credentials) (core.AccessToken, error) {
 	accessToken := core.AccessToken{}
-	reqBody, _ := json.Marshal(&core.Credentials{
-		Email:    email,
-		Password: password,
-	})
+	reqBody, _ := json.Marshal(credentials)
 
 	jsonStr := []byte(string(reqBody))
 	req := GetReq(core.Post, "/api/auth/login", jsonStr)
