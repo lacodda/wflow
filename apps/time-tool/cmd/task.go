@@ -43,7 +43,7 @@ var TaskCmd = &cobra.Command{
 		taskReq := core.TaskReq{}
 		taskReq.Date = date
 
-		err := survey.Ask(getQuestions(core.TaskReq{Completeness: 100}), &taskReq)
+		err := survey.Ask(getTaskQuestions(core.TaskReq{Completeness: 100}), &taskReq)
 		if err != nil {
 			core.Danger("Prompt failed: %v\n", err.Error())
 			return
@@ -59,7 +59,7 @@ var TaskCmd = &cobra.Command{
 	},
 }
 
-func getQuestions(taskReq core.TaskReq) []*survey.Question {
+func getTaskQuestions(taskReq core.TaskReq) []*survey.Question {
 	return []*survey.Question{
 		{
 			Name:      "name",
@@ -122,7 +122,7 @@ func findAndPush(date time.Time) {
 		taskReq := core.TaskReq{}
 		taskReq.Date = date
 
-		err := survey.Ask(getQuestions(core.TaskReq{
+		err := survey.Ask(getTaskQuestions(core.TaskReq{
 			Name:         task.Name,
 			Comment:      task.Comment,
 			Completeness: task.Completeness + 1,

@@ -1,12 +1,11 @@
 package cmd
 
 import (
-	"errors"
 	"finlab/apps/time-tool/api"
 	"finlab/apps/time-tool/config"
 	"finlab/apps/time-tool/core"
 
-	"github.com/manifoldco/promptui"
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"
 )
 
@@ -15,27 +14,15 @@ var LoginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Authenticate to the finlab server.",
 	Run: func(cmd *cobra.Command, args []string) {
-		loginPrompt := promptui.Prompt{
-			Label:    "Login",
-			Validate: validateLogin,
-		}
+		credentials := core.Credentials{}
 
-		passwordPrompt := promptui.Prompt{
-			Label:    "Password",
-			Validate: validatePassword,
-			Mask:     '*',
-		}
-
-		login, errL := loginPrompt.Run()
-		password, errP := passwordPrompt.Run()
-		promptErr := core.NotNil(errL, errP)
-
-		if promptErr != nil {
-			core.Danger("Prompt failed: %v\n", promptErr)
+		err := survey.Ask(getLoginQuestions(core.Credentials{}), &credentials)
+		if err != nil {
+			core.Danger("Prompt failed: %v\n", err.Error())
 			return
 		}
 
-		token, err := api.SignIn(login, password)
+		token, err := api.SignIn(credentials)
 		if err != nil {
 			core.Danger("Error: %v\n", err.Error())
 			return
@@ -45,16 +32,17 @@ var LoginCmd = &cobra.Command{
 	},
 }
 
-func validateLogin(input string) error {
-	if len(input) < 3 {
-		return errors.New("LOGIN MUST HAVE MORE THAN 3 CHARACTERS")
+func getLoginQuestions(credentials core.Credentials) []*survey.Question {
+	return []*survey.Question{
+		{
+			Name:     "email",
+			Prompt:   &survey.Input{Message: "Login", Default: credentials.Email},
+			Validate: survey.Required,
+		},
+		{
+			Name:     "password",
+			Prompt:   &survey.Password{Message: "Password"},
+			Validate: survey.Required,
+		},
 	}
-	return nil
-}
-
-func validatePassword(input string) error {
-	if len(input) == 0 {
-		return errors.New("PASSWORD MUST HAVE MORE THAN 1 CHARACTERS")
-	}
-	return nil
 }
