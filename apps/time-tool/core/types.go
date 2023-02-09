@@ -67,6 +67,7 @@ const (
 
 type Task struct {
 	Id                 string    `json:"_id"`
+	TaskId             string    `json:"taskId"`
 	Date               time.Time `json:"date"`
 	Name               string    `json:"name"`
 	Comment            string    `json:"comment"`
@@ -75,6 +76,7 @@ type Task struct {
 }
 
 type TaskReq struct {
+	TaskId       string    `json:"taskId"`
 	Date         time.Time `json:"date"`
 	Name         string    `json:"name"`
 	Comment      string    `json:"comment"`

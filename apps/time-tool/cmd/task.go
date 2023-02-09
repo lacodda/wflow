@@ -100,7 +100,7 @@ func show(date time.Time) {
 }
 
 func findAndPush(date time.Time) {
-	from, to := core.LaskWeekRange()
+	from, to := core.LastWeekRange()
 	tasksRes, err := api.PullTasks(from, to, true)
 	if err != nil {
 		core.Danger("Error: %v\n", err.Error())
@@ -119,8 +119,10 @@ func findAndPush(date time.Time) {
 
 	for _, n := range selectedTaskNames {
 		task := tasksRes.FindByName(re.FindStringSubmatch(n)[1])
-		taskReq := core.TaskReq{}
-		taskReq.Date = date
+		taskReq := core.TaskReq{
+			TaskId: task.TaskId,
+			Date:   date,
+		}
 
 		err := survey.Ask(getTaskQuestions(core.TaskReq{
 			Name:         task.Name,
