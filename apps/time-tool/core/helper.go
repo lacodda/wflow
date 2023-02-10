@@ -1,9 +1,13 @@
 package core
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"strings"
+	"text/template"
 	"time"
 )
 
@@ -101,4 +105,45 @@ func LastWeekRange() (from time.Time, to time.Time) {
 	from = time.Date(currentYear, currentMonth, currentDay-7, 0, 0, 0, 0, currentLocation)
 	to = time.Date(currentYear, currentMonth, currentDay-1, 23, 59, 59, 999, currentLocation)
 	return
+}
+
+func GetUrl[T comparable](urlTemplate string, obj T) string {
+	t, _ := template.New("").Parse(urlTemplate)
+	var tpl bytes.Buffer
+	if err := t.Execute(&tpl, obj); err != nil {
+		log.Fatalln(err)
+	}
+
+	return tpl.String()
+}
+
+func Unique[T comparable](s []T) []T {
+	result := make([]T, 0)
+	for _, v := range s {
+		if !Contains(result, v) {
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
+func Filter[T comparable](s []T, f func([]T, T) bool) []T {
+	result := make([]T, 0)
+	for _, v := range s {
+		if f(result, v) {
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
+func PrettyPrint(b []byte) []byte {
+	var out bytes.Buffer
+	err := json.Indent(&out, b, "", "  ")
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	return out.Bytes()
 }
