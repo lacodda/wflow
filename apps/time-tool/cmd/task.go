@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"finlab/apps/time-tool/api"
+	"finlab/apps/time-tool/config"
 	"finlab/apps/time-tool/core"
+	"finlab/apps/time-tool/gitlab"
 	"finlab/apps/time-tool/validator"
 	"fmt"
 	"regexp"
@@ -36,6 +38,7 @@ var TaskCmd = &cobra.Command{
 			show(date)
 			return
 		} else if FlagTaskFind {
+			findAndPushGitLab(date)
 			findAndPush(date)
 			return
 		}
@@ -146,6 +149,32 @@ func findAndPush(date time.Time) {
 	}
 
 	core.Info("Selected tasks saved with date: %s\n", date.Format(core.DateTpl))
+}
+
+func findAndPushGitLab(date time.Time) {
+	gitLabConfig := config.ReadConfig().GitLab
+	commits := gitlab.GetCommitsByDate(gitLabConfig, date)
+	if len(commits) > 0 {
+		core.Info("GitLab Commits:\n")
+	}
+	for _, name := range commits {
+		taskReq := core.TaskReq{
+			Date:         date,
+			Name:         name,
+			Completeness: 100,
+		}
+		taskRes, err := api.PushTask(taskReq)
+
+		if err != nil {
+			core.Danger("Error: %v\n", err.Error())
+			return
+		}
+
+		core.Info("Task: %s (Completeness: %v%%)\n", taskRes.Data.Name, taskRes.Data.Completeness)
+	}
+	if len(commits) > 0 {
+		core.Info("=========================================================\n")
+	}
 }
 
 func printTaskRes(tasks []core.Task) {
