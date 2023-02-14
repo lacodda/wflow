@@ -4,6 +4,7 @@ import (
 	"errors"
 	"finlab/apps/time-tool/api"
 	"finlab/apps/time-tool/core"
+	"finlab/apps/time-tool/db"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -83,7 +84,7 @@ var TimestampCmd = &cobra.Command{
 		timestampRes, err := api.PushTimestamp(timestamp)
 		if err != nil {
 			core.Danger("Error: %v\n", err.Error())
-			err := api.SetTimestamp(timestamp)
+			err := db.SetTimestamp(timestamp)
 			if err != nil {
 				core.Danger("Error: %v\n", err.Error())
 			}

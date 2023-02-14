@@ -3,6 +3,7 @@ package cmd
 import (
 	"finlab/apps/time-tool/api"
 	"finlab/apps/time-tool/core"
+	"finlab/apps/time-tool/db"
 
 	"github.com/spf13/cobra"
 )
@@ -16,7 +17,7 @@ var SyncCmd = &cobra.Command{
 	Short: "Synchronizing local storage with the server.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(FlagSyncDelete) > 0 {
-			deletedTimestamps, _ := api.DeleteTimestampsByIds(FlagSyncDelete)
+			deletedTimestamps, _ := db.DeleteTimestampsByIds(FlagSyncDelete)
 			if len(deletedTimestamps) == 0 {
 				core.Danger("No records for deleting!\n")
 				return
@@ -25,7 +26,7 @@ var SyncCmd = &cobra.Command{
 			printTimestamps(deletedTimestamps)
 			return
 		}
-		timestamps, _ := api.GetTimestamps()
+		timestamps, _ := db.GetTimestamps()
 		if len(timestamps) == 0 {
 			core.Warning("No records for synchronizing with the server!\n")
 			return
@@ -39,7 +40,7 @@ var SyncCmd = &cobra.Command{
 		printTimestamps(timestamps)
 
 		if !FlagSyncShow {
-			api.DeleteTimestamps()
+			db.DeleteTimestamps()
 			core.Success("Your data is synced!\n")
 		}
 	},
