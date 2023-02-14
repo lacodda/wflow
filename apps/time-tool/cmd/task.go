@@ -4,6 +4,7 @@ import (
 	"finlab/apps/time-tool/api"
 	"finlab/apps/time-tool/config"
 	"finlab/apps/time-tool/core"
+	"finlab/apps/time-tool/db"
 	"finlab/apps/time-tool/gitlab"
 	"finlab/apps/time-tool/validator"
 	"fmt"
@@ -55,6 +56,12 @@ var TaskCmd = &cobra.Command{
 
 		if err != nil {
 			core.Danger("Error: %v\n", err.Error())
+			err := db.SetTask(taskReq)
+			if err != nil {
+				core.Danger("Error: %v\n", err.Error())
+			}
+			core.Success("Task saved in local database\n")
+			core.Info("Task: %s (Completeness: %v%%)\n", taskReq.Name, taskReq.Completeness)
 			return
 		}
 

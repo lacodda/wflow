@@ -66,7 +66,7 @@ const (
 )
 
 type Task struct {
-	Id                 string    `json:"_id"`
+	Id                 uint      `json:"id"`
 	TaskId             string    `json:"taskId"`
 	Date               time.Time `json:"date"`
 	Name               string    `json:"name"`
