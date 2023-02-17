@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"golang.org/x/exp/slices"
@@ -46,7 +47,7 @@ const dateFormat string = "2006-01-02"
 const urlUserEvents string = "/users/{{.UserId}}/events"
 const urlCommit string = "/projects/{{.ProjectId}}/repository/commits/{{.CommitTo}}"
 
-func GetCommitsByDate(gitLabConfig GitLabConfig, date time.Time) []string {
+func GetCommitsByDate(gitLabConfig GitLabConfig, date time.Time, names []string) []string {
 	url := core.GetUrl(urlUserEvents, UserID{UserId: gitLabConfig.UserId})
 	req := getReq(gitLabConfig, url)
 	query := req.URL.Query()
@@ -63,8 +64,10 @@ func GetCommitsByDate(gitLabConfig GitLabConfig, date time.Time) []string {
 			ProjectId: event.ProjectId,
 			CommitTo:  event.PushData.CommitTo,
 		}
-		commit := getCommitMessage(gitLabConfig, projectCommit)
-		result = append(result, commit)
+		commitMsg := getCommitMessage(gitLabConfig, projectCommit)
+		if !core.Contains(names, commitMsg) {
+			result = append(result, commitMsg)
+		}
 	}
 
 	return result
@@ -77,7 +80,7 @@ func getCommitMessage(gitLabConfig GitLabConfig, projectCommit ProjectCommit) st
 	result := Commit{}
 	json.Unmarshal([]byte(body), &result)
 
-	return result.Message
+	return strings.TrimSuffix(result.Message, "\n")
 }
 
 func getReq(gitLabConfig GitLabConfig, url string) *http.Request {

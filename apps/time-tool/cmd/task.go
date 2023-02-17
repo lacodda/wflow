@@ -39,8 +39,8 @@ var TaskCmd = &cobra.Command{
 			show(date)
 			return
 		} else if FlagTaskFind {
-			findAndPushGitLab(date)
 			findAndPush(date)
+			findAndPushGitLab(date)
 			return
 		}
 
@@ -109,6 +109,20 @@ func show(date time.Time) {
 	printTaskRes(tasksRes.Data)
 }
 
+func getTaskNames(date time.Time) ([]string, error) {
+	from, to := core.DayRange(date)
+	tasksRes, err := api.PullTasks(from, to, false)
+	if err != nil {
+		return nil, err
+	}
+	taskNames := []string{}
+	for _, task := range tasksRes.Data {
+		taskNames = append(taskNames, task.Name)
+	}
+
+	return taskNames, nil
+}
+
 func findAndPush(date time.Time) {
 	from, to := core.LastWeekRange()
 	tasksRes, err := api.PullTasks(from, to, true)
@@ -160,7 +174,12 @@ func findAndPush(date time.Time) {
 
 func findAndPushGitLab(date time.Time) {
 	gitLabConfig := config.ReadConfig().GitLab
-	commits := gitlab.GetCommitsByDate(gitLabConfig, date)
+	taskNames, err := getTaskNames(date)
+	if err != nil {
+		core.Danger("Error: %v\n", err.Error())
+		return
+	}
+	commits := gitlab.GetCommitsByDate(gitLabConfig, date, taskNames)
 	if len(commits) > 0 {
 		core.Info("GitLab Commits:\n")
 	}
