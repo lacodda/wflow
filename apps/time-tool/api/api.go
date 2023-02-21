@@ -156,11 +156,15 @@ func PullTasks(from time.Time, to time.Time, incomplete bool) (core.TasksRes, er
 	return tasksRes, nil
 }
 
-func PullSummary(from time.Time, to time.Time) (core.SummaryRes, error) {
+func PullSummary(from time.Time, to time.Time, isRecalculate bool) (core.SummaryRes, error) {
 	summaryRes := core.SummaryRes{}
 
 	jsonStr := []byte("")
-	req := GetReq(core.Get, fmt.Sprintf("/api/work-time/summary?from=%s&to=%s", from.Format(core.DateISOTpl), to.Format(core.DateISOTpl)), jsonStr)
+	recalculate := ""
+	if isRecalculate {
+		recalculate = "/recalculate"
+	}
+	req := GetReq(core.Get, fmt.Sprintf("/api/work-time/summary%s?from=%s&to=%s", recalculate, from.Format(core.DateISOTpl), to.Format(core.DateISOTpl)), jsonStr)
 	body, resp, err := GetBody(req)
 
 	if err != nil {

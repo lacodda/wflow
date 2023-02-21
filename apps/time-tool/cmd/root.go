@@ -52,5 +52,6 @@ func init() {
 	ReportCmd.Flags().StringVarP(&FlagReportDate, "date", "d", "", `Select a date to display: e.g. "2023-01-19"`)
 	ReportCmd.Flags().BoolVar(&FlagReportSend, "send", false, "Send report")
 	ReportCmd.Flags().BoolVar(&FlagReportTestSend, "test", false, "Send test report")
-	SummaryCmd.Flags().StringVarP(&FlagSummaryDate, "date", "d", "", `Select a date to display: e.g. "2023-01"`)
+	SummaryCmd.Flags().StringVarP(&FlagSummaryDate, "date", "d", "", `Select a month to display: e.g. "2023-01"`)
+	SummaryCmd.Flags().BoolVarP(&FlagSummaryRecalculate, "recalculate", "R", false, "Recalculate summary")
 }

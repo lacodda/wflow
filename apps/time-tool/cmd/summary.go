@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	FlagSummaryDate = ""
+	FlagSummaryDate        = ""
+	FlagSummaryRecalculate = false
 )
 
 var SummaryCmd = &cobra.Command{
@@ -26,13 +27,16 @@ var SummaryCmd = &cobra.Command{
 			}
 		}
 		from, to := core.MonthRange(date)
-		summaryRes, err := api.PullSummary(from, to)
+		summaryRes, err := api.PullSummary(from, to, FlagSummaryRecalculate)
 		if err != nil {
 			core.Danger("Error: %v\n", err.Error())
 			return
 		}
 		core.Info("Date: %s\n", date.Format(core.DateTpl))
 		printSummaryRes(summaryRes.Data)
+		if len(summaryRes.Data) > 0 {
+			core.Info("Average time: %s\n", core.MinutesToTimeStr(summaryRes.TotalTime/len(summaryRes.Data)))
+		}
 		core.Info("Total time: %s\n", core.MinutesToTimeStr(summaryRes.TotalTime))
 	},
 }
