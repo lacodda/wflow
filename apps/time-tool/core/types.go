@@ -91,6 +91,16 @@ type TasksRes struct {
 	Data []Task `json:"data"`
 }
 
+type Summary struct {
+	Date string `json:"date"`
+	Time int    `json:"time"`
+}
+
+type SummaryRes struct {
+	Data      []Summary `json:"data"`
+	TotalTime int       `json:"totalTime"`
+}
+
 func (c Method) ToString() string {
 	return fmt.Sprintf("%s", c)
 }

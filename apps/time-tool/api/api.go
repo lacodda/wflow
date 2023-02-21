@@ -155,3 +155,26 @@ func PullTasks(from time.Time, to time.Time, incomplete bool) (core.TasksRes, er
 
 	return tasksRes, nil
 }
+
+func PullSummary(from time.Time, to time.Time) (core.SummaryRes, error) {
+	summaryRes := core.SummaryRes{}
+
+	jsonStr := []byte("")
+	req := GetReq(core.Get, fmt.Sprintf("/api/work-time/summary?from=%s&to=%s", from.Format(core.DateISOTpl), to.Format(core.DateISOTpl)), jsonStr)
+	body, resp, err := GetBody(req)
+
+	if err != nil {
+		return summaryRes, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err := core.Error{}
+		json.Unmarshal([]byte(body), &err)
+
+		return summaryRes, errors.New(err.Message)
+	}
+
+	json.Unmarshal([]byte(body), &summaryRes)
+
+	return summaryRes, nil
+}
