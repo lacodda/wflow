@@ -97,6 +97,15 @@ func DayRange(date time.Time) (from time.Time, to time.Time) {
 	return
 }
 
+func MonthRange(date time.Time) (from time.Time, to time.Time) {
+	currentYear, currentMonth, _ := date.Date()
+	currentLocation := date.Location()
+
+	from = time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
+	to = from.AddDate(0, 1, -1)
+	return
+}
+
 func LastWeekRange() (from time.Time, to time.Time) {
 	date := time.Now()
 	currentYear, currentMonth, currentDay := date.Date()
