@@ -109,7 +109,7 @@ func show(date time.Time) {
 		core.Danger("Error: %v\n", err.Error())
 		return
 	}
-	core.Info("Date: %s\n", date.Format(core.DateTpl))
+	core.Info("Date: %s\n\n", date.Format(core.DateDotTpl))
 	printTaskRes(tasksRes.Data)
 }
 
@@ -239,7 +239,14 @@ func findAndDelete(date time.Time) {
 }
 
 func printTaskRes(tasks []core.Task) {
+	if len(tasks) > 0 {
+		core.Info("Tasks:\n")
+		core.Info("=========================================================\n")
+	}
 	for key, task := range tasks {
 		core.Info("[%d] %s (Completeness: %v%%)\n", key+1, task.Name, task.Completeness)
+	}
+	if len(tasks) > 0 {
+		core.Info("\n")
 	}
 }

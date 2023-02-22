@@ -72,9 +72,8 @@ var TimestampCmd = &cobra.Command{
 				core.Danger("Error: %v\n", err.Error())
 				return
 			}
-			core.Info("Date: %s\n", date.Format(core.DateTpl))
-			printTimestampsRes(timestampsRes.Data)
-			core.Info("Total time: %s\n", core.MinutesToTimeStr(timestampsRes.TotalTime))
+			core.Info("Date: %s\n\n", date.Format(core.DateDotTpl))
+			printTimestampsRes(timestampsRes)
 			return
 		}
 		timestamp := core.Timestamp{
@@ -97,9 +96,18 @@ var TimestampCmd = &cobra.Command{
 	},
 }
 
-func printTimestampsRes(timestamps []core.TimestampReq) {
-	for key, timestamp := range timestamps {
+func printTimestampsRes(timestamps core.TimestampsRes) {
+	if len(timestamps.Data) > 0 {
+		core.Info("Timestamps:\n")
+		core.Info("=========================================================\n")
+	}
+	for key, timestamp := range timestamps.Data {
 		time, _ := time.Parse(core.DateISOTpl, timestamp.Timestamp)
 		core.Info("[%d] %s (%s)\n", key+1, time.Format(core.TimeTpl), timestamp.Type)
+	}
+	if timestamps.TotalTime > 0 {
+		core.Info("=========================================================\n")
+		core.Info("Total time: %s\n", core.MinutesToTimeStr(timestamps.TotalTime))
+		core.Info("\n")
 	}
 }

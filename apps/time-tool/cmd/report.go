@@ -54,14 +54,8 @@ var ReportCmd = &cobra.Command{
 			return
 		}
 
-		core.Info("Date: %s\n", date.Format(core.DateDotTpl))
-		core.Info("Timestamps:\n")
-		core.Info("=========================================================\n")
-		printTimestampsRes(timestampsRes.Data)
-		core.Info("Total time: %s\n", core.MinutesToTimeStr(timestampsRes.TotalTime))
-		core.Info("=========================================================\n")
-		core.Info("Tasks:\n")
-		core.Info("=========================================================\n")
+		core.Info("Date: %s\n\n", date.Format(core.DateDotTpl))
+		printTimestampsRes(timestampsRes)
 		printTaskRes(tasksRes.Data)
 
 		fileName, err := excel.SeveXlsx(date, timestampsRes, tasksRes)
@@ -70,6 +64,15 @@ var ReportCmd = &cobra.Command{
 		}
 
 		if FlagReportSend {
+			if len(timestampsRes.Data) == 0 {
+				core.Danger("Message not sent. There is no timestamps!\n")
+				return
+			}
+			if len(tasksRes.Data) == 0 {
+				core.Danger("Message not sent. There are no tasks!\n")
+				return
+			}
+
 			var mailObj = config.ReadConfig().Mail
 			mailObj.Subject = fmt.Sprintf(config.ReadConfig().Mail.Subject, date.Format(core.DateDotTpl), core.MinutesToTimeStr(timestampsRes.TotalTime))
 			if FlagReportTestSend {
@@ -81,6 +84,5 @@ var ReportCmd = &cobra.Command{
 			mail.SendMail(msg)
 			core.Success("Your report %s has been sent to %s!\n", fileName, mailObj.To)
 		}
-
 	},
 }

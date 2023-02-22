@@ -32,18 +32,23 @@ var SummaryCmd = &cobra.Command{
 			core.Danger("Error: %v\n", err.Error())
 			return
 		}
-		core.Info("Date: %s\n", date.Format(core.DateTpl))
-		printSummaryRes(summaryRes.Data)
-		if len(summaryRes.Data) > 0 {
-			core.Info("Average time: %s\n", core.MinutesToTimeStr(summaryRes.TotalTime/len(summaryRes.Data)))
-		}
-		core.Info("Total time: %s\n", core.MinutesToTimeStr(summaryRes.TotalTime))
+		core.Info("Date: %s\n\n", date.Format(core.DateDotTpl))
+		printSummaryRes(summaryRes)
 	},
 }
 
-func printSummaryRes(summary []core.Summary) {
-	for key, sum := range summary {
-		date, _ := time.Parse(core.DateISOTpl, sum.Date)
-		core.Info("[%d] %s (%s)\n", key+1, date.Format(core.DateDotTpl), core.MinutesToTimeStr(sum.Time))
+func printSummaryRes(summary core.SummaryRes) {
+	if len(summary.Data) > 0 {
+		core.Info("Summary:\n")
+		core.Info("=========================================================\n")
+	}
+	for key, summary := range summary.Data {
+		date, _ := time.Parse(core.DateISOTpl, summary.Date)
+		core.Info("[%d] %s (%s)\n", key+1, date.Format(core.DateDotTpl), core.MinutesToTimeStr(summary.Time))
+	}
+	if len(summary.Data) > 0 {
+		core.Info("=========================================================\n")
+		core.Info("Average time: %s\n", core.MinutesToTimeStr(summary.TotalTime/len(summary.Data)))
+		core.Info("Total time: %s\n", core.MinutesToTimeStr(summary.TotalTime))
 	}
 }
