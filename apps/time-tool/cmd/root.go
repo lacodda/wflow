@@ -47,6 +47,7 @@ func init() {
 	TaskCmd.Flags().BoolVarP(&FlagTaskShow, "show", "s", false, "Show a list of tasks for the selected day")
 	TaskCmd.Flags().BoolVarP(&FlagTaskFind, "find", "f", false, "Find incomplete tasks")
 	TaskCmd.Flags().StringVarP(&FlagTaskDate, "date", "d", "", `Select a date to display: e.g. "2023-01-19"`)
+	TaskCmd.Flags().BoolVarP(&FlagTaskDelete, "delete", "D", false, "Deleting tasks")
 	SyncCmd.Flags().BoolVarP(&FlagSyncShow, "show", "s", false, "Show records for synchronizing with the server")
 	SyncCmd.Flags().IntSliceVarP(&FlagSyncDelete, "delete", "D", []int{}, "ID records for deleting")
 	ReportCmd.Flags().StringVarP(&FlagReportDate, "date", "d", "", `Select a date to display: e.g. "2023-01-19"`)

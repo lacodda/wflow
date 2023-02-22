@@ -156,6 +156,14 @@ func PullTasks(from time.Time, to time.Time, incomplete bool) (core.TasksRes, er
 	return tasksRes, nil
 }
 
+func DeleteTask(id string) error {
+	jsonStr := []byte("")
+	req := GetReq(core.Delete, fmt.Sprintf("/api/work-time/task/%s", id), jsonStr)
+	_, _, err := GetBody(req)
+
+	return err
+}
+
 func PullSummary(from time.Time, to time.Time, isRecalculate bool) (core.SummaryRes, error) {
 	summaryRes := core.SummaryRes{}
 

@@ -16,9 +16,10 @@ import (
 )
 
 var (
-	FlagTaskShow = false
-	FlagTaskFind = false
-	FlagTaskDate = ""
+	FlagTaskShow   = false
+	FlagTaskFind   = false
+	FlagTaskDate   = ""
+	FlagTaskDelete = false
 )
 
 var TaskCmd = &cobra.Command{
@@ -41,6 +42,9 @@ var TaskCmd = &cobra.Command{
 		} else if FlagTaskFind {
 			findAndPush(date)
 			findAndPushGitLab(date)
+			return
+		} else if FlagTaskDelete {
+			findAndDelete(date)
 			return
 		}
 
@@ -200,6 +204,37 @@ func findAndPushGitLab(date time.Time) {
 	}
 	if len(commits) > 0 {
 		core.Info("=========================================================\n")
+	}
+}
+
+func findAndDelete(date time.Time) {
+	from, to := core.DayRange(date)
+	tasksRes, err := api.PullTasks(from, to, false)
+	if err != nil {
+		core.Danger("Error: %v\n", err.Error())
+		return
+	}
+
+	selectedTaskNames := []string{}
+	taskNames := make([]string, len(tasksRes.Data))
+
+	for key, task := range tasksRes.Data {
+		taskNames[key] = fmt.Sprintf("%s (Completeness: %v%%)", task.Name, task.Completeness)
+	}
+
+	survey.Ask(getSelectTasks(taskNames), &selectedTaskNames)
+	re := regexp.MustCompile(`(.+)\s\(\w+:\s(\d+)%\)`)
+
+	for _, n := range selectedTaskNames {
+		task := tasksRes.FindByName(re.FindStringSubmatch(n)[1])
+		err := api.DeleteTask(task.Id)
+
+		if err != nil {
+			core.Danger("Error: %v\n", err.Error())
+			return
+		}
+
+		core.Danger("Task: %s (Completeness: %v%%) has been deleted!\n", task.Name, task.Completeness)
 	}
 }
 
