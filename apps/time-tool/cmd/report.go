@@ -58,7 +58,7 @@ var ReportCmd = &cobra.Command{
 		printTimestampsRes(timestampsRes)
 		printTaskRes(tasksRes.Data)
 
-		fileName, err := excel.SeveXlsx(date, timestampsRes, tasksRes)
+		fileName, err := excel.SeveXLSXReport(date, timestampsRes, tasksRes)
 		if err != nil {
 			core.Danger("Error: %s\n", err.Error())
 		}

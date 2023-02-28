@@ -38,6 +38,7 @@ func init() {
 	rootCmd.AddCommand(TaskCmd)
 	rootCmd.AddCommand(SyncCmd)
 	rootCmd.AddCommand(ReportCmd)
+	rootCmd.AddCommand(MonthlyReportCmd)
 	rootCmd.AddCommand(SummaryCmd)
 
 	TimestampCmd.Flags().VarP(&FlagTimestampType, "type", "t", `Type of timestamp. Allowed: "Start", "End", "StartBreak", "EndBreak"`)
