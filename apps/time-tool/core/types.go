@@ -101,6 +101,17 @@ type SummaryRes struct {
 	TotalTime int       `json:"totalTime"`
 }
 
+type Calendar struct {
+	Date string `json:"date"`
+	Type string `json:"type"`
+	Time int    `json:"time"`
+}
+
+type CalendarRes struct {
+	Data      []Calendar `json:"data"`
+	TotalTime int        `json:"totalTime"`
+}
+
 func (c Method) ToString() string {
 	return fmt.Sprintf("%s", c)
 }

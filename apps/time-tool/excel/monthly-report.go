@@ -3,6 +3,7 @@ package excel
 import (
 	"finlab/apps/time-tool/core"
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -52,10 +53,10 @@ func getCell(colNum int32) (letter string, header string, body string) {
 	return
 }
 
-func SeveXLSXMonthlyReport(from time.Time, to time.Time, summaryRes core.SummaryRes) (fileName string, err error) {
+func SeveXLSXMonthlyReport(month time.Month, year int, calendarRes core.CalendarRes) (fileName string, err error) {
 	zoom = 70.0
-	monthName := monthNames[from.Month()-1]
-	monthYearText := fmt.Sprintf("%v %v", strings.ToLower(monthName), from.Year())
+	monthName := monthNames[month-1]
+	monthYearText := fmt.Sprintf("%v %v", strings.ToLower(monthName), year)
 	totalTimeText := "Итого:"
 	totalWorkDaysText := "Раб:"
 
@@ -92,13 +93,15 @@ func SeveXLSXMonthlyReport(from time.Time, to time.Time, summaryRes core.Summary
 	bodyTotal2Style, _ := xlsx.NewStyle(GetCellStyle(bodyTotal2CellStyle))
 	bodyTotalDaysStyle, _ := xlsx.NewStyle(GetCellStyle(bodyTotalDaysCellStyle))
 	weekendStyle, _ := xlsx.NewStyle(GetCellStyle(weekendCellStyle))
-
+	total := core.MinutesToTimeStr(calendarRes.TotalTime)
+	total2 := math.Ceil(float64(calendarRes.TotalTime)/60*100) / 100
+	totalDays := math.Floor(total2/8*100) / 100
 	cells := [][]interface{}{
 		{22.11, headerStyle, monthYearText, basicStyle, nil},
 		{6.11, headerStyle, nil, []int{basicStyle, weekendStyle}, nil},
-		{12.5, headerTotalStyle, totalTimeText, bodyTotalStyle, core.MinutesToTimeStr(summaryRes.TotalTime)},
-		{8.89, headerTotalStyle, totalTimeText, bodyTotal2Style, summaryRes.TotalTime * 24},
-		{8.89, headerTotalDaysStyle, totalWorkDaysText, bodyTotalDaysStyle, summaryRes.TotalTime * 24 / 8},
+		{12.5, headerTotalStyle, totalTimeText, bodyTotalStyle, total},
+		{8.89, headerTotalStyle, totalTimeText, bodyTotal2Style, total2},
+		{8.89, headerTotalDaysStyle, totalWorkDaysText, bodyTotalDaysStyle, totalDays},
 	}
 
 	var (
@@ -119,20 +122,18 @@ func SeveXLSXMonthlyReport(from time.Time, to time.Time, summaryRes core.Summary
 			}
 			colNum++
 		} else {
-			for day := from; !day.After(to); day = day.AddDate(0, 0, 1) {
+			for _, summary := range calendarRes.Data {
+				date, _ := time.Parse(core.DateISOTpl, summary.Date)
 				letter, header, body = getCell(colNum)
 				xlsx.SetColWidth(sheet, letter, letter, cell[0].(float64))
 				xlsx.SetCellStyle(sheet, header, header, cell[1].(int))
 				xlsx.SetCellStyle(sheet, body, body, cell[3].([]int)[0])
-				xlsx.SetCellValue(sheet, header, day.Day())
-				if day.Weekday() == time.Saturday || day.Weekday() == time.Sunday {
+				xlsx.SetCellValue(sheet, header, date.Day())
+				if summary.Type == "Weekend" || summary.Type == "PaidWeekend" {
 					xlsx.SetCellStyle(sheet, body, body, cell[3].([]int)[1])
 				}
-				for _, summary := range summaryRes.Data {
-					date, _ := time.Parse(core.DateISOTpl, summary.Date)
-					if day.YearDay() == date.YearDay() {
-						xlsx.SetCellValue(sheet, body, core.MinutesToTimeStr(summary.Time))
-					}
+				if summary.Time > 0 {
+					xlsx.SetCellValue(sheet, body, core.MinutesToTimeStr(summary.Time))
 				}
 				colNum++
 			}

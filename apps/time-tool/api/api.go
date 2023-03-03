@@ -190,3 +190,27 @@ func PullSummary(from time.Time, to time.Time, isRecalculate bool) (core.Summary
 
 	return summaryRes, nil
 }
+
+func PullCalendar(month time.Month, year int) (core.CalendarRes, error) {
+	calendarRes := core.CalendarRes{}
+
+	jsonStr := []byte("")
+
+	req := GetReq(core.Get, fmt.Sprintf("/api/work-time/calendar?month=%d&year=%d&summary=true", month, year), jsonStr)
+	body, resp, err := GetBody(req)
+
+	if err != nil {
+		return calendarRes, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		err := core.Error{}
+		json.Unmarshal([]byte(body), &err)
+
+		return calendarRes, errors.New(err.Message)
+	}
+
+	json.Unmarshal([]byte(body), &calendarRes)
+
+	return calendarRes, nil
+}

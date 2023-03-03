@@ -9,25 +9,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	FlagMonthDate = ""
+)
+
 var MonthlyReportCmd = &cobra.Command{
 	Use:   "month",
 	Short: "Prepare a monthly report",
 	Run: func(cmd *cobra.Command, args []string) {
 		var date = time.Now()
-		if len(FlagSummaryDate) > 0 {
+		if len(FlagMonthDate) > 0 {
 			var err error
-			date, err = time.Parse("2006-01", FlagSummaryDate)
+			date, err = time.Parse("2006-01", FlagMonthDate)
 			if err != nil {
 				core.Danger("Error: %v\n", err.Error())
 				return
 			}
 		}
-		from, to := core.MonthRange(date)
-		summaryRes, err := api.PullSummary(from, to, FlagSummaryRecalculate)
+		month := date.Month()
+		year := date.Year()
+		calendarRes, err := api.PullCalendar(month, year)
 		if err != nil {
 			core.Danger("Error: %v\n", err.Error())
 			return
 		}
-		excel.SeveXLSXMonthlyReport(from, to, summaryRes)
+		excel.SeveXLSXMonthlyReport(month, year, calendarRes)
 	},
 }
