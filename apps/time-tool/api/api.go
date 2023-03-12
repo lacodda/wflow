@@ -164,15 +164,11 @@ func DeleteTask(id string) error {
 	return err
 }
 
-func PullSummary(from time.Time, to time.Time, isRecalculate bool) (core.SummaryRes, error) {
+func PullSummary(from time.Time, to time.Time, recalculate bool) (core.SummaryRes, error) {
 	summaryRes := core.SummaryRes{}
 
 	jsonStr := []byte("")
-	recalculate := ""
-	if isRecalculate {
-		recalculate = "/recalculate"
-	}
-	req := GetReq(core.Get, fmt.Sprintf("/api/work-time/summary%s?from=%s&to=%s", recalculate, from.Format(core.DateISOTpl), to.Format(core.DateISOTpl)), jsonStr)
+	req := GetReq(core.Get, fmt.Sprintf("/api/work-time/summary?from=%s&to=%s&recalculate=%v", from.Format(core.DateISOTpl), to.Format(core.DateISOTpl), recalculate), jsonStr)
 	body, resp, err := GetBody(req)
 
 	if err != nil {
