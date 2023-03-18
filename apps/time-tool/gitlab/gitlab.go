@@ -79,8 +79,8 @@ func getCommitMessage(gitLabConfig GitLabConfig, projectCommit ProjectCommit) st
 	body := getBody(req)
 	result := Commit{}
 	json.Unmarshal([]byte(body), &result)
-
-	return strings.TrimSuffix(result.Message, "\n")
+	messageSlice := strings.Split(strings.ReplaceAll(result.Message, "\r\n", "\n"), "\n")
+	return strings.TrimSuffix(messageSlice[0], "\n")
 }
 
 func getReq(gitLabConfig GitLabConfig, url string) *http.Request {
