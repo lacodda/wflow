@@ -1,6 +1,6 @@
 package main
 
-import "finlab/apps/time-tool/cmd"
+import "wflow/cmd"
 
 func main() {
 	cmd.Execute()

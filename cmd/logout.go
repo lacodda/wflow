@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"finlab/apps/time-tool/config"
-	"finlab/apps/time-tool/core"
+	"wflow/config"
+	"wflow/core"
 
 	"github.com/spf13/cobra"
 )

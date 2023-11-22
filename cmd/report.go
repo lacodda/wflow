@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"finlab/apps/time-tool/api"
-	"finlab/apps/time-tool/config"
-	"finlab/apps/time-tool/core"
-	"finlab/apps/time-tool/excel"
-	"finlab/apps/time-tool/mail"
+	"wflow/api"
+	"wflow/config"
+	"wflow/core"
+	"wflow/excel"
+	"wflow/mail"
 	"fmt"
 	"time"
 

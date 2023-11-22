@@ -1,4 +1,4 @@
-module finlab
+module wflow
 
 go 1.18
 

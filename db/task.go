@@ -2,7 +2,7 @@ package db
 
 import (
 	"encoding/json"
-	"finlab/apps/time-tool/core"
+	"wflow/core"
 )
 
 const (

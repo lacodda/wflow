@@ -2,7 +2,7 @@ package gitlab
 
 import (
 	"encoding/json"
-	"finlab/apps/time-tool/core"
+	"wflow/core"
 	"io/ioutil"
 	"log"
 	"net/http"

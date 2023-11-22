@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"finlab/apps/time-tool/api"
-	"finlab/apps/time-tool/config"
-	"finlab/apps/time-tool/core"
-	"finlab/apps/time-tool/db"
-	"finlab/apps/time-tool/gitlab"
-	"finlab/apps/time-tool/validator"
+	"wflow/api"
+	"wflow/config"
+	"wflow/core"
+	"wflow/db"
+	"wflow/gitlab"
+	"wflow/validator"
 	"fmt"
 	"regexp"
 	"time"

@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"errors"
-	"finlab/apps/time-tool/api"
-	"finlab/apps/time-tool/core"
-	"finlab/apps/time-tool/db"
+	"wflow/api"
+	"wflow/core"
+	"wflow/db"
 	"time"
 
 	"github.com/spf13/cobra"

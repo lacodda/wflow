@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"finlab/apps/time-tool/api"
-	"finlab/apps/time-tool/config"
-	"finlab/apps/time-tool/core"
+	"wflow/api"
+	"wflow/config"
+	"wflow/core"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/spf13/cobra"

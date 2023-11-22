@@ -2,9 +2,9 @@ package config
 
 import (
 	"encoding/json"
-	"finlab/apps/time-tool/core"
-	"finlab/apps/time-tool/gitlab"
-	"finlab/apps/time-tool/mail"
+	"wflow/core"
+	"wflow/gitlab"
+	"wflow/mail"
 	"path/filepath"
 
 	"github.com/shibukawa/configdir"
@@ -29,7 +29,7 @@ const (
 	DbFile          string = "data.db"
 )
 
-var configDirs = configdir.New("lacodda", "time-tool")
+var configDirs = configdir.New("lacodda", "wflow")
 
 func ReadConfig() Config {
 	var config Config
